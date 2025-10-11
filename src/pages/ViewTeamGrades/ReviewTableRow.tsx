@@ -20,7 +20,7 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
           ) : (
             <span className="tick">✓</span>
           )}
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.itemNumber}
+          {row.itemNumber}
         </div>
       </td>
       {/* Toggle Item */}

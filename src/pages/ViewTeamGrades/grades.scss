@@ -7,6 +7,8 @@
 .circle-container {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .circle {
@@ -18,8 +20,8 @@
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  color: rgb(176, 4, 4);;
-  margin-left: -20px; /* Add margin to separate the circle from the text */
+  color: rgb(176, 4, 4);
+  flex-shrink: 0;
 }
 
 .tick {
@@ -27,8 +29,8 @@
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  color: rgb(176, 4, 4);;
-  margin-left: -15px; /* Add margin to separate the circle from the text */
+  color: rgb(176, 4, 4);
+  flex-shrink: 0;
 }
 
 /* Colors used for coloring score cells within the heatgrid for the grades view */
