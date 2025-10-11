@@ -24,7 +24,7 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
         </div>
       </td>
       {/* Toggle Item */}
-      {showToggleQuestion && <td className="text-center">{row.itemText}</td>}
+      {showToggleQuestion && <td className="item-prompt-cell">{row.itemText}</td>}
 
       {/* Review Cells */}
       {row.reviews.map((review, idx) => (

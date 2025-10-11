@@ -85,7 +85,7 @@ const ReviewTable: React.FC = () => {
                 Item No.
               </th>
               {showToggleQuestion && (
-                <th className="py-2 px-4 text-center" style={{ width: "150px" }}>
+                <th className="item-prompt-header" style={{ width: "150px" }}>
                   Item
                 </th>
               )}

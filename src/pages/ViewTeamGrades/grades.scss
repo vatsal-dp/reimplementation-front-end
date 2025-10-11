@@ -130,6 +130,17 @@
   table-layout: fixed;
 }
 
+/* Left-align item prompt header and cells */
+.item-prompt-header {
+  text-align: left !important;
+  padding: 10px;
+}
+
+.item-prompt-cell {
+  text-align: left !important;
+  padding: 8px;
+}
+
 /* Hides padding for specific rows */
 .hiddenRow {
   padding: 0 !important;
