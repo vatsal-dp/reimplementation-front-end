@@ -3,8 +3,8 @@ import ReviewTable from './ReviewTable'; // Importing the ReviewTable component
 
 // Interface defining the structure of ReviewData
 export interface ReviewData {
-  questionNumber: string;
-  questionText: string;
+  itemNumber: string;
+  itemText: string;
   reviews: { score: number; comment?: string }[]; // Array of objects with score and optional comment
   RowAvg: number; // Average score for the row
   maxScore: number; // Maximum possible score

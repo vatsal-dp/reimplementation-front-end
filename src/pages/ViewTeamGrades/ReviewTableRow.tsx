@@ -5,26 +5,26 @@ import { ReviewData } from "./App"; // Importing the ReviewData interface from A
 // Props interface for ReviewTableRow component
 interface ReviewTableRowProps {
   row: ReviewData; // Data for the row
-  showToggleQuestion: boolean; // Flag to toggle the question column
+  showToggleQuestion: boolean; // Flag to toggle the item column
 }
 
 // Functional component ReviewTableRow
 const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion }) => {
   return (
     <tr className={row.maxScore === 1 ? "no-bg" : ""}>
-      {/* Question Number */}
-      <td className="py-2 px-4 text-center" data-question={row.questionText}>
+      {/* Item Number */}
+      <td className="py-2 px-4 text-center" data-question={row.itemText}>
         <div className="circle-container">
           {row.maxScore !== 1 ? (
             <span className="circle">{row.maxScore}</span>
           ) : (
             <span className="tick">✓</span>
           )}
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.questionNumber}
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{row.itemNumber}
         </div>
       </td>
-      {/* Toggle Question */}
-      {showToggleQuestion && <td className="text-center">{row.questionText}</td>}
+      {/* Toggle Item */}
+      {showToggleQuestion && <td className="text-center">{row.itemText}</td>}
 
       {/* Review Cells */}
       {row.reviews.map((review, idx) => (

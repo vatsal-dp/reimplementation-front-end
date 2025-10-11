@@ -1,6 +1,6 @@
 // Statistics.tsx
 import React, { useState, useEffect } from "react";
-import { calculateAverages } from "./utils";
+import { calculateAverages, normalizeReviewDataArray } from "./utils";
 import "./grades.scss";
 import dummyDataRounds from "./Data/heatMapData.json"; // Importing dummy data for rounds
 import dummyauthorfeedback from "./Data/authorFeedback.json"; // Importing dummy data for author feedback
@@ -13,8 +13,10 @@ interface StatisticsProps {}
 const Statistics: React.FC<StatisticsProps> = () => {
   const [sortedData, setSortedData] = useState<any[]>([]);
   useEffect(() => {
+    // Normalize data to handle both old and new field names
+    const normalizedData = normalizeReviewDataArray(dummyDataRounds[0]);
     const { averagePeerReviewScore, columnAverages, sortedData } = calculateAverages(
-      dummyDataRounds[0],
+      normalizedData,
       "asc"
     );
     const rowAvgArray = sortedData.map((item) => item.RowAvg);
@@ -89,8 +91,10 @@ const Statistics: React.FC<StatisticsProps> = () => {
         </thead>
         <tbody>
           {dummyDataRounds.map((roundData, index) => {
+            // Normalize data to handle both old and new field names
+            const normalizedData = normalizeReviewDataArray(roundData);
             // Calculate averages for each category using data from utils or manually.
-            const submittedWorkAvg = calculateAverages(roundData, "asc").averagePeerReviewScore;
+            const submittedWorkAvg = calculateAverages(normalizedData, "asc").averagePeerReviewScore;
             const authorFeedbackAvg =
               dummyauthorfeedback[index]?.reduce((acc, item) => {
                 const questionScoreSum = item.reviews.reduce(

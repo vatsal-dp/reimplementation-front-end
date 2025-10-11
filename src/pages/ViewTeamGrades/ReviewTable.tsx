@@ -3,7 +3,7 @@ import ReviewTableRow from "./ReviewTableRow";
 import RoundSelector from "./RoundSelector";
 import dummyDataRounds from "./Data/heatMapData.json";
 import dummyData from "./Data/dummyData.json";
-import { calculateAverages, getColorClass } from "./utils";
+import { calculateAverages, normalizeReviewDataArray } from "./utils";
 import "./grades.scss";
 import { Link } from "react-router-dom";
 import Statistics from "./Statistics";
@@ -55,8 +55,11 @@ const ReviewTable: React.FC = () => {
   };
 
   const renderTable = (roundData: any, roundIndex: number) => {
+    // Normalize data to handle both old (questionNumber/questionText) and new (itemNumber/itemText) field names
+    const normalizedData = normalizeReviewDataArray(roundData);
+    
     const { averagePeerReviewScore, columnAverages, sortedData } = calculateAverages(
-      roundData,
+      normalizedData,
       sortOrderRow
     );
 
@@ -69,11 +72,11 @@ const ReviewTable: React.FC = () => {
           <thead>
             <tr className="bg-gray-200">
               <th className="py-2 px-4 text-center" style={{ width: "70px" }}>
-                Question No.
+                Item No.
               </th>
               {showToggleQuestion && (
                 <th className="py-2 px-4 text-center" style={{ width: "150px" }}>
-                  Question
+                  Item
                 </th>
               )}
               {Array.from({ length: roundData[0].reviews.length }, (_, i) => (

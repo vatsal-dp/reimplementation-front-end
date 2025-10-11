@@ -1,5 +1,21 @@
 import { ReviewData } from './App';
 
+// Helper function to normalize data from old format (questionNumber/questionText) to new format (itemNumber/itemText)
+export const normalizeReviewData = (data: any): ReviewData => {
+  return {
+    itemNumber: data.itemNumber || data.questionNumber || '',
+    itemText: data.itemText || data.questionText || '',
+    reviews: data.reviews || [],
+    RowAvg: data.RowAvg || 0,
+    maxScore: data.maxScore || 5
+  };
+};
+
+// Function to normalize an array of review data
+export const normalizeReviewDataArray = (dataArray: any[]): ReviewData[] => {
+  return dataArray.map(normalizeReviewData);
+};
+
 // Function to get color class based on score and maxScore
 export const getColorClass = (score: number, maxScore: number) => {
   let scoreColor = score;
@@ -19,18 +35,18 @@ export const calculateAverages = (
   sortOrderRow: 'asc' | 'desc' | 'none'
 ) => {
   let totalAvg = 0;
-  let questionCount = 0;
+  let itemCount = 0;
   let totalMaxScore = 0;
   currentRoundData.forEach((row) => {
     const sum = row.reviews.reduce((acc, val) => acc + val.score, 0);
     row.RowAvg = sum / row.reviews.length;
     totalAvg = row.RowAvg + totalAvg;
     totalMaxScore = totalMaxScore + row.maxScore;
-    questionCount++;
+    itemCount++;
   });
 
   const averagePeerReviewScore =
-    questionCount > 0
+    itemCount > 0
       ? (((totalAvg / totalMaxScore) * 100) > 0 ? ((totalAvg / totalMaxScore) * 100).toFixed(2) : '0.00')
       : '0.00';
 
