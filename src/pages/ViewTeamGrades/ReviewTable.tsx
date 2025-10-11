@@ -186,7 +186,7 @@ const ReviewTable: React.FC = () => {
           checked={showToggleQuestion}
           onChange={toggleShowQuestion}
         />
-        <label htmlFor="toggleQuestion"> &nbsp;Toggle Question List</label>
+        <label htmlFor="toggleQuestion"> &nbsp;{showToggleQuestion ? "Hide item prompts" : "Show item prompts"}</label>
       </div>
 
       {/* Conditionally render tables based on currentRound */}
