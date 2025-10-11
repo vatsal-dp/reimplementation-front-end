@@ -1,6 +1,12 @@
 import React from 'react';
 import ReviewTable from './ReviewTable'; // Importing the ReviewTable component
 
+// Interface defining the structure of a team member
+export interface TeamMember {
+  name: string;
+  username: string;
+}
+
 // Interface defining the structure of ReviewData
 export interface ReviewData {
   itemNumber: string;

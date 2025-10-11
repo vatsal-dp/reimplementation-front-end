@@ -4,6 +4,7 @@ import RoundSelector from "./RoundSelector";
 import dummyDataRounds from "./Data/heatMapData.json";
 import dummyData from "./Data/dummyData.json";
 import { calculateAverages, normalizeReviewDataArray } from "./utils";
+import { TeamMember } from "./App";
 import "./grades.scss";
 import { Link } from "react-router-dom";
 import Statistics from "./Statistics";
@@ -16,13 +17,22 @@ const ReviewTable: React.FC = () => {
   const [sortOrderRow, setSortOrderRow] = useState<"asc" | "desc" | "none">("none");
   const [showToggleQuestion, setShowToggleQuestion] = useState(false);
   const [open, setOpen] = useState(false);
-  const [teamMembers, setTeamMembers] = useState<string[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [showReviews, setShowReviews] = useState(false);
   const [ShowAuthorFeedback, setShowAuthorFeedback] = useState(false);
   const [roundSelected, setRoundSelected] = useState(-1);
 
   useEffect(() => {
-    setTeamMembers(dummyData.members);
+    // Normalize members data to support both old (string array) and new (object array) formats
+    const normalizedMembers = dummyData.members.map((member: any) => {
+      if (typeof member === 'string') {
+        // Old format: just a string (name)
+        return { name: member, username: '' };
+      }
+      // New format: object with name and username
+      return member;
+    });
+    setTeamMembers(normalizedMembers);
   }, []);
 
   const toggleSortOrderRow = () => {
@@ -127,7 +137,7 @@ const ReviewTable: React.FC = () => {
         Team members:{" "}
         {teamMembers.map((member, index) => (
           <span key={index}>
-            {member}
+            {member.name}{member.username && ` (${member.username})`}
             {index !== teamMembers.length - 1 && ", "}
           </span>
         ))}
