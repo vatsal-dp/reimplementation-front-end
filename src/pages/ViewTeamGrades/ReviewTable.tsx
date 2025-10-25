@@ -30,6 +30,7 @@ const ReviewTable: React.FC = () => {
   const [teamName, setTeamName] = useState<string>(dummyData.team || "");
   const [teamGrade, setTeamGrade] = useState<number | string>(dummyData.grade || "");
   const [teamComment, setTeamComment] = useState<string>(dummyData.comment || "");
+  const [submissionLinks, setSubmissionLinks] = useState<string[] | null>(null);
   const [teamFetchError, setTeamFetchError] = useState<string | null>(null);
   const [lastParticipantsResp, setLastParticipantsResp] = useState<any>(null);
   const [lastTeamResp, setLastTeamResp] = useState<any>(null);
@@ -220,28 +221,54 @@ const ReviewTable: React.FC = () => {
         setTeamName(teamObj.name || teamObj.team_name || teamObj.display_name || teamName);
         setTeamGrade(teamObj.grade_for_submission ?? teamGrade);
         setTeamComment(teamObj.comment_for_submission ?? teamComment);
+        // attempt to extract submission hyperlinks from the team object
+        const links: string[] = [];
+        if (teamObj.hyperlinks && Array.isArray(teamObj.hyperlinks)) {
+          teamObj.hyperlinks.forEach((l: any) => links.push(String(l)));
+        }
+        if (teamObj.submitted_hyperlinks) {
+          // try JSON parse first
+          try {
+            const parsed = JSON.parse(teamObj.submitted_hyperlinks);
+            if (Array.isArray(parsed)) parsed.forEach((l: any) => links.push(String(l)));
+          } catch (e) {
+            // fallback: extract URLs using regex from YAML or string
+            const str = String(teamObj.submitted_hyperlinks);
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const found = str.match(urlRegex) || [];
+            found.forEach((u: string) => links.push(u));
+          }
+        }
+        setSubmissionLinks(links.length > 0 ? Array.from(new Set(links)) : null);
       }
 
       // 3) fetch user details for each team participant (map user_id -> user)
-      const userIds: number[] = teamParticipants
+      const sourceParticipants = teamParticipants && teamParticipants.length > 0 ? teamParticipants : [];
+      const userIds: number[] = sourceParticipants
         .map((tp: any) => tp.user_id || tp.userId || (tp.participant && tp.participant.user_id))
         .filter(Boolean);
 
       const uniqueUserIds = Array.from(new Set(userIds));
 
-      const userFetches = uniqueUserIds.map((uid) => axiosClient.get(`/users/${uid}`));
-      const usersResp = await Promise.allSettled(userFetches);
+      let members: any[] = [];
+      if (uniqueUserIds.length > 0) {
+        const userFetches = uniqueUserIds.map((uid) => axiosClient.get(`/users/${uid}`));
+        const usersResp = await Promise.allSettled(userFetches);
 
-      const members = usersResp
-        .map((r) => (r.status === "fulfilled" ? r.value.data : null))
-        .filter(Boolean)
-        .map((u: any) => ({ name: u.full_name || u.fullName || u.name, username: u.name }));
+        members = usersResp
+          .map((r) => (r.status === "fulfilled" ? r.value.data : null))
+          .filter(Boolean)
+          .map((u: any) => ({ name: u.full_name || u.fullName || u.name, username: u.name }));
+      }
 
-      if (members.length > 0) {
+      // If we couldn't fetch user records (e.g., users endpoint blocked), fall back to participant handles
+      if (members.length === 0 && sourceParticipants.length > 0) {
+        members = sourceParticipants.map((p: any) => ({ name: p.handle || `user_${p.user_id || p.id}`, username: String(p.user_id || p.id || "") }));
+        setTeamMembers(members);
+        setTeamFetchError("Team participants resolved but user details couldn't be fetched; showing participant handles instead.");
+      } else if (members.length > 0) {
         setTeamMembers(members);
         setTeamFetchError(null);
-      } else {
-        setTeamFetchError("Team participants resolved but no user records could be fetched.");
       }
     } catch (err: any) {
       console.warn("Failed to fetch team metadata", err?.message || err);
@@ -400,32 +427,21 @@ const ReviewTable: React.FC = () => {
       </details>
       <div className="mt-2">
         <h5>Submission Links</h5>
-        <ul>
-          <li>
-            <a
-              href="https://github.ncsu.edu/Program-2-Ruby-on-Rails/WolfEvents"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://github.ncsu.edu/Program-2-Ruby-on-Rails/WolfEvents
-            </a>
-          </li>
-          <li>
-            <a href="http://152.7.177.44:8080/" target="_blank" rel="noopener noreferrer">
-              http://152.7.177.44:8080/
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://github.ncsu.edu/Program-2-Ruby-on-Rails/WolfEvents/raw/main/README.md"
-              download="README.md"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              README.md
-            </a>
-          </li>
-        </ul>
+        {submissionLinks && submissionLinks.length > 0 ? (
+          <ul>
+            {submissionLinks.map((l, i) => (
+              <li key={i}>
+                <a href={l} target="_blank" rel="noopener noreferrer">
+                  {l}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div>
+            <em>No submission links found for this team.</em>
+          </div>
+        )}
       </div>
 
   <Statistics roundsSource={roundsData} />
