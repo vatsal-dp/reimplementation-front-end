@@ -16,6 +16,35 @@ export const normalizeReviewDataArray = (dataArray: any[]): ReviewData[] => {
   return dataArray.map(normalizeReviewData);
 };
 
+// Convert backend rounds array (array of arrays of answer objects) to frontend round format
+export const convertBackendRoundArray = (backendRounds: any[][]): ReviewData[][] => {
+  if (!Array.isArray(backendRounds)) return [];
+  return backendRounds.map((backendRound) => {
+    if (!Array.isArray(backendRound)) return [];
+    return backendRound.map((answersArray: any[], idx: number) => {
+      const reviews = (answersArray || []).map((ans: any) => ({
+        name: ans.reviewer_name || '',
+        score: typeof ans.answer === 'number' ? ans.answer : Number(ans.answer) || 0,
+        comment: ans.comments || '',
+      }));
+
+      const sum = reviews.reduce((acc: number, r: any) => acc + (r.score || 0), 0);
+      const rowAvg = reviews.length ? sum / reviews.length : 0;
+
+      // Heuristic for maxScore: if all scores are 0/1 then treat as binary (maxScore=1), else default to 5
+      const maxScore = reviews.every((r: any) => r.score === 0 || r.score === 1) ? 1 : 5;
+
+      return {
+        itemNumber: String(idx + 1),
+        itemText: (answersArray && answersArray[0] && answersArray[0].txt) || '',
+        reviews,
+        RowAvg: rowAvg,
+        maxScore,
+      } as ReviewData;
+    });
+  });
+};
+
 // Function to get color class based on score and maxScore
 export const getColorClass = (score: number, maxScore: number) => {
   let scoreColor = score;

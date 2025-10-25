@@ -7,14 +7,17 @@ import dummyauthorfeedback from "./Data/authorFeedback.json"; // Importing dummy
 import teammateData from "./Data/teammateData.json";
 
 //props for statistics component
-interface StatisticsProps {}
+interface StatisticsProps {
+  roundsSource?: any[] | null;
+}
 
 //statistics component
-const Statistics: React.FC<StatisticsProps> = () => {
+const Statistics: React.FC<StatisticsProps> = ({ roundsSource = null }) => {
   const [sortedData, setSortedData] = useState<any[]>([]);
   useEffect(() => {
     // Normalize data to handle both old and new field names
-    const normalizedData = normalizeReviewDataArray(dummyDataRounds[0]);
+    const referenceRounds = roundsSource || dummyDataRounds;
+    const normalizedData = normalizeReviewDataArray(referenceRounds[0]);
     const { averagePeerReviewScore, columnAverages, sortedData } = calculateAverages(
       normalizedData,
       "asc"
@@ -54,19 +57,22 @@ const Statistics: React.FC<StatisticsProps> = () => {
 
   //calculation for total reviews recieved
   let totalReviewsForQuestion1: number = 0;
-  dummyDataRounds.forEach((round) => {
-    round.forEach((question) => {
-      if (question.questionNumber === "1") {
-        totalReviewsForQuestion1 += question.reviews.length;
+  const roundsSourceLocal = roundsSource || dummyDataRounds;
+  roundsSourceLocal.forEach((round: any[]) => {
+    round.forEach((question: any) => {
+      const qNum = (question?.questionNumber ?? question?.itemNumber ?? "").toString();
+      if (qNum === "1") {
+        totalReviewsForQuestion1 += (question.reviews || []).length;
       }
     });
   });
   //calculation for total feedback recieved
   let totalfeedbackForQuestion1: number = 0;
-  dummyauthorfeedback.forEach((round) => {
-    round.forEach((question) => {
-      if (question.questionNumber === "1") {
-        totalfeedbackForQuestion1 += question.reviews.length;
+  dummyauthorfeedback.forEach((round: any[]) => {
+    round.forEach((question: any) => {
+      const qNum = (question?.questionNumber ?? question?.itemNumber ?? "").toString();
+      if (qNum === "1") {
+        totalfeedbackForQuestion1 += (question.reviews || []).length;
       }
     });
   });
@@ -90,7 +96,7 @@ const Statistics: React.FC<StatisticsProps> = () => {
           </tr>
         </thead>
         <tbody>
-          {dummyDataRounds.map((roundData, index) => {
+          {(roundsSource || dummyDataRounds).map((roundData, index) => {
             // Normalize data to handle both old and new field names
             const normalizedData = normalizeReviewDataArray(roundData);
             // Calculate averages for each category using data from utils or manually.
