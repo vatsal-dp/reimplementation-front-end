@@ -28,8 +28,14 @@ const CollapsibleRound: React.FC<{
   roundIndex: number;
   roundData: Review[];
   isStudent: boolean;
-}> = ({ roundIndex, roundData, isStudent }) => {
+  expandAll: boolean;
+}> = ({ roundIndex, roundData, isStudent, expandAll }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Sync with expandAll prop
+  React.useEffect(() => {
+    setIsExpanded(expandAll);
+  }, [expandAll]);
 
   const num_of_questions = roundData.length;
   const num_of_reviews = roundData[0]?.reviews.length || 0;
@@ -56,7 +62,7 @@ const CollapsibleRound: React.FC<{
         }}
       >
         <span style={{ fontSize: "10px" }}>{isExpanded ? "▼" : "▶"}</span>
-        <span>Round {roundIndex + 1}(10 reviews, {num_of_questions} questions)</span>
+        <span>Round {roundIndex + 1}({num_of_reviews} reviews, {num_of_questions} questions)</span>
       </button>
 
       {isExpanded && (
@@ -67,6 +73,7 @@ const CollapsibleRound: React.FC<{
               reviewIndex={i}
               roundData={roundData}
               isStudent={isStudent}
+              expandAll={expandAll}
             />
           ))}
         </div>
@@ -80,8 +87,14 @@ const CollapsibleReview: React.FC<{
   reviewIndex: number;
   roundData: Review[];
   isStudent: boolean;
-}> = ({ reviewIndex, roundData, isStudent }) => {
+  expandAll: boolean;
+}> = ({ reviewIndex, roundData, isStudent, expandAll }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Sync with expandAll prop
+  React.useEffect(() => {
+    setIsExpanded(expandAll);
+  }, [expandAll]);
 
   return (
     <div style={{ marginBottom: "8px", marginLeft: "0" }}>
@@ -142,6 +155,7 @@ const CollapsibleReview: React.FC<{
 const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected }) => {
   console.log("round selected: ", roundSelected);
   const rounds = data.length;
+  const [expandAllReviews, setExpandAllReviews] = useState(false);
 
   const auth = useSelector(
     (state: RootState) => state.authentication,
@@ -169,6 +183,7 @@ const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected }) => {
           roundIndex={r}
           roundData={data[r]}
           isStudent={isStudent}
+          expandAll={expandAllReviews}
         />
       );
     }
@@ -176,7 +191,35 @@ const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected }) => {
     return reviewElements;
   };
 
-  return <div>{rounds > 0 ? renderReviews() : <div>No reviews available</div>}</div>;
+  return (
+    <div>
+      {rounds > 0 ? (
+        <>
+          <div style={{ marginBottom: "15px" }}>
+            <button
+              onClick={() => setExpandAllReviews(!expandAllReviews)}
+              style={{
+                background: expandAllReviews ? "#990000" : "white",
+                border: "2px solid #990000",
+                borderRadius: "0",
+                cursor: "pointer",
+                padding: "8px 16px",
+                color: expandAllReviews ? "white" : "#990000",
+                fontWeight: "bold",
+                fontSize: "14px",
+                fontFamily: "Arial, sans-serif"
+              }}
+            >
+              {expandAllReviews ? "Collapse All Reviews" : "Show All Reviews"}
+            </button>
+          </div>
+          {renderReviews()}
+        </>
+      ) : (
+        <div>No reviews available</div>
+      )}
+    </div>
+  );
 };
 
-export default ShowReviews; 
+export default ShowReviews;
