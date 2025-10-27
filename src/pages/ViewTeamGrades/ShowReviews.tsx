@@ -31,6 +31,7 @@ const CollapsibleRound: React.FC<{
   expandAll: boolean;
 }> = ({ roundIndex, roundData, isStudent, expandAll }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   // Sync with expandAll prop
   React.useEffect(() => {
@@ -66,7 +67,7 @@ const CollapsibleRound: React.FC<{
       </button>
 
       {isExpanded && (
-        <div style={{ padding: "10px 0" }}>
+        <div ref={containerRef} style={{ padding: "10px 0", display: "table", width: "auto" }}>
           {Array.from({ length: num_of_reviews }, (_, i) => (
             <CollapsibleReview
               key={`round-${roundIndex}-review-${i}`}
@@ -90,6 +91,7 @@ const CollapsibleReview: React.FC<{
   expandAll: boolean;
 }> = ({ reviewIndex, roundData, isStudent, expandAll }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const contentRef = React.useRef<HTMLDivElement>(null);
 
   // Sync with expandAll prop
   React.useEffect(() => {
@@ -122,10 +124,10 @@ const CollapsibleReview: React.FC<{
       </button>
 
       {isExpanded && (
-        <div style={{ padding: "15px 20px", background: "#f9f9f9" }}>
+        <div ref={contentRef} style={{ padding: "15px 20px", display: "inline-block", minWidth: "100%" }}>
           {roundData.map((question, j) => (
-            <div key={`question-${j}-review-${reviewIndex}`} className="review-block" style={{ marginBottom: "15px" }}>
-              <div className="question" style={{ fontWeight: "bold", marginBottom: "8px", fontSize: "14px" }}>
+            <div key={`question-${j}-review-${reviewIndex}`} className="review-block" style={{ marginBottom: "15px", minWidth: "max-content" }}>
+              <div className="question" style={{ fontWeight: "bold", marginBottom: "8px", fontSize: "14px", whiteSpace: "nowrap" }}>
                 {j + 1}. {question.questionText}
               </div>
               <div className="score-container" style={{ marginLeft: "15px" }}>
@@ -138,7 +140,7 @@ const CollapsibleReview: React.FC<{
                   {question.reviews[reviewIndex].score}
                 </span>
                 {question.reviews[reviewIndex].comment && (
-                  <div className="comment" style={{ marginTop: "5px", fontSize: "14px", color: "#555" }}>
+                  <div className="comment" style={{ marginTop: "5px", fontSize: "14px", color: "#555", whiteSpace: "nowrap" }}>
                     {question.reviews[reviewIndex].comment}
                   </div>
                 )}
