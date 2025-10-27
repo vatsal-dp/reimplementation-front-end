@@ -16,6 +16,36 @@ import { useSelector } from "react-redux";
 import { getAuthToken } from "../../utils/auth";
 import jwtDecode from "jwt-decode";
 
+// Truncatable text component
+const TruncatableText: React.FC<{ text: string; wordLimit?: number }> = ({ text, wordLimit = 10 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const words = text.split(" ");
+  const shouldTruncate = words.length > wordLimit;
+  const displayText = isExpanded || !shouldTruncate
+    ? text
+    : words.slice(0, wordLimit).join(" ");
+
+  return (
+    <span>
+      {displayText}
+      {shouldTruncate && (
+        <span
+          onClick={() => setIsExpanded(!isExpanded)}
+          style={{
+            color: "#b00404",
+            cursor: "pointer",
+            fontWeight: "bold",
+            marginLeft: "4px"
+          }}
+        >
+          {isExpanded ? " [show less]" : "..."}
+        </span>
+      )}
+    </span>
+  );
+};
+
 const ReviewTable: React.FC = () => {
   const [currentRound, setCurrentRound] = useState<number>(-1);
   const [sortOrderRow, setSortOrderRow] = useState<"asc" | "desc" | "none">("none");
@@ -493,7 +523,7 @@ const ReviewTable: React.FC = () => {
       <div className="mt-4">
         <h2>Grade and Comment for Submission</h2>
         <p>Grade: {teamGrade ?? dummyData.grade}</p>
-        <p>Comment: {teamComment ?? dummyData.comment}</p>
+        <p>Comment: <TruncatableText text={teamComment ?? dummyData.comment} wordLimit={10} /></p>
         <p>Late penalty: {dummyData.late_penalty}</p>
       </div>
 

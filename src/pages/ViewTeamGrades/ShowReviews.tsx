@@ -3,6 +3,36 @@ import { getColorClass } from "./utils";
 import { RootState } from "../../store/store";
 import { useDispatch, useSelector } from "react-redux";
 
+// Truncatable text component
+const TruncatableText: React.FC<{ text: string; wordLimit?: number }> = ({ text, wordLimit = 10 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const words = text.split(" ");
+  const shouldTruncate = words.length > wordLimit;
+  const displayText = isExpanded || !shouldTruncate
+    ? text
+    : words.slice(0, wordLimit).join(" ");
+
+  return (
+    <span>
+      {displayText}
+      {shouldTruncate && (
+        <span
+          onClick={() => setIsExpanded(!isExpanded)}
+          style={{
+            color: "#b00404",
+            cursor: "pointer",
+            fontWeight: "bold",
+            marginLeft: "4px"
+          }}
+        >
+          {isExpanded ? " [show less]" : "..."}
+        </span>
+      )}
+    </span>
+  );
+};
+
 //props for the ShowReviews
 interface ReviewComment {
   score: number;
@@ -56,21 +86,22 @@ const CollapsibleRound: React.FC<{
     <div style={{ marginBottom: "10px" }} ref={containerRef}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        style={{ 
+        style={{
           textAlign: "left",
-          background: "#990000",
-          border: "2px solid #990000",
-          borderRadius: "0",
+          background: "#b00404",
+          border: "2px solid #b00404",
+          borderRadius: "2px",
           cursor: "pointer",
           padding: "8px 16px",
           color: "white",
           fontWeight: "bold",
           fontSize: "14px",
-          fontFamily: "Arial, sans-serif",
+          fontFamily: "verdana, arial, helvetica, sans-serif",
           width: "100%",
           display: "flex",
           alignItems: "center",
-          gap: "8px"
+          gap: "8px",
+          transition: "background-color 0.3s ease"
         }}
       >
         <span style={{ fontSize: "10px" }}>{isExpanded ? "▼" : "▶"}</span>
@@ -139,21 +170,22 @@ const CollapsibleReview: React.FC<{
     <div style={{ marginBottom: "8px", marginLeft: "0" }} ref={contentRef}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        style={{ 
+        style={{
           textAlign: "left",
           background: "white",
-          border: "2px solid #990000",
-          borderRadius: "0",
+          border: "2px solid #b00404",
+          borderRadius: "2px",
           cursor: "pointer",
           padding: "8px 16px",
-          color: "#990000",
+          color: "#b00404",
           fontWeight: "bold",
           fontSize: "14px",
-          fontFamily: "Arial, sans-serif",
+          fontFamily: "verdana, arial, helvetica, sans-serif",
           width: "100%",
           display: "flex",
           alignItems: "center",
-          gap: "8px"
+          gap: "8px",
+          transition: "background-color 0.3s ease"
         }}
       >
         <span style={{ fontSize: "10px" }}>{isExpanded ? "▼" : "▶"}</span>
@@ -177,8 +209,8 @@ const CollapsibleReview: React.FC<{
                   {question.reviews[reviewIndex].score}
                 </span>
                 {question.reviews[reviewIndex].comment && (
-                  <div className="comment" style={{ marginTop: "5px", fontSize: "14px", color: "#555", whiteSpace: "nowrap" }}>
-                    {question.reviews[reviewIndex].comment}
+                  <div className="comment" style={{ marginTop: "5px", fontSize: "14px", color: "#555" }}>
+                    <TruncatableText text={question.reviews[reviewIndex].comment} wordLimit={10} />
                   </div>
                 )}
               </div>
@@ -240,18 +272,19 @@ const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected, targetRe
             <button
               onClick={() => setExpandAllReviews(!expandAllReviews)}
               style={{
-                background: expandAllReviews ? "#990000" : "white",
-                border: "2px solid #990000",
-                borderRadius: "0",
+                background: expandAllReviews ? "#b00404" : "transparent",
+                border: "2px solid #b00404",
+                borderRadius: "2px",
                 cursor: "pointer",
-                padding: "8px 16px",
-                color: expandAllReviews ? "white" : "#990000",
+                padding: "10px 20px",
+                color: expandAllReviews ? "white" : "#b00404",
                 fontWeight: "bold",
                 fontSize: "14px",
-                fontFamily: "Arial, sans-serif"
+                fontFamily: "verdana, arial, helvetica, sans-serif",
+                transition: "background-color 0.3s ease, color 0.3s ease"
               }}
             >
-              {expandAllReviews ? "Collapse All Reviews" : "Show All Reviews"}
+              {expandAllReviews ? "Hide all reviews" : "Show all reviews"}
             </button>
           </div>
           {renderReviews()}
