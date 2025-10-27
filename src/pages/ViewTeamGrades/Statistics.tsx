@@ -84,15 +84,15 @@ const Statistics: React.FC<StatisticsProps> = ({ roundsSource = null }) => {
 
   return (
     <div className="table-container mb-6">
-      <h5 className="font-semibold">Round Summary</h5>
+      <h5>Round Summary</h5>
       <table className="tbl_heat">
         <thead>
           <tr>
             <th>Round</th>
-            <th>Submitted Work (Avg)</th>
-            <th>Author Feedback (Avg)</th>
-            <th>Teammate Review (Avg)</th>
-            <th>Final Score</th>
+            <th>Submitted work (avg)</th>
+            <th>Author feedback (avg)</th>
+            <th>Teammate review (avg)</th>
+            <th>Final score</th>
           </tr>
         </thead>
         <tbody>

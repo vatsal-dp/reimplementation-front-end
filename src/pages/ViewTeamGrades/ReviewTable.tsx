@@ -318,14 +318,14 @@ const ReviewTable: React.FC = () => {
 
     return (
       <div key={roundIndex} className="table-container mb-6">
-        <h4 className="text-xl font-semibold">
+        <h2>
           Review (Round: {roundIndex + 1} of {roundsSource.length})
-        </h4>
+        </h2>
         <table className="tbl_heat">
           <thead>
             <tr className="bg-gray-200">
               <th className="py-2 px-4 text-center" style={{ width: "70px" }}>
-                Item No.
+                Item no.
               </th>
               {showToggleQuestion && (
                 <th className="item-prompt-header" style={{ width: "150px" }}>
@@ -374,8 +374,8 @@ const ReviewTable: React.FC = () => {
 
   return (
     <div className="p-4">
-    <h2 className="text-2xl font-bold mb-2">Summary Report: Program 2</h2>
-  <h5 className="text-xl font-semibold mb-1">Team: {teamName || dummyData.team}</h5>
+    <h2>Summary Report: Program 2</h2>
+  <h5>Team: {teamName || dummyData.team}</h5>
       <div className="mb-3">
         <label htmlFor="assignmentId" className="mr-2">
           Assignment ID:
@@ -426,7 +426,7 @@ const ReviewTable: React.FC = () => {
         </div>
       </details>
       <div className="mt-2">
-        <h5>Submission Links</h5>
+        <h5>Submission links</h5>
         {submissionLinks && submissionLinks.length > 0 ? (
           <ul>
             {submissionLinks.map((l, i) => (
@@ -489,15 +489,12 @@ const ReviewTable: React.FC = () => {
         )}
       </div>
 
-      <p className="mt-4">
-        <h3>Grade and comment for submission</h3>
-        Grade: {teamGrade ?? dummyData.grade}
-        <br />
-        Comment: {teamComment ?? dummyData.comment}
-        <br />
-        Late Penalty: {dummyData.late_penalty}
-        <br />
-      </p>
+      <div className="mt-4">
+        <h2>Grade and Comment for Submission</h2>
+        <p>Grade: {teamGrade ?? dummyData.grade}</p>
+        <p>Comment: {teamComment ?? dummyData.comment}</p>
+        <p>Late penalty: {dummyData.late_penalty}</p>
+      </div>
 
       <Link to="/">Back</Link>
     </div>
