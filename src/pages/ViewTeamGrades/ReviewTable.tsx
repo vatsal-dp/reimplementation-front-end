@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ReviewTableRow from "./ReviewTableRow";
 import RoundSelector from "./RoundSelector";
 import dummyDataRounds from "./Data/heatMapData.json";
@@ -10,8 +10,8 @@ import "./grades.scss";
 import { Link } from "react-router-dom";
 import Statistics from "./Statistics";
 import Filters from "./Filters";
-import ShowReviews from "./ShowReviews"; //importing show reviews component
-import dummyauthorfeedback from "./Data/authorFeedback.json"; // Importing dummy data for author feedback
+import ShowReviews from "./ShowReviews";
+import dummyauthorfeedback from "./Data/authorFeedback.json";
 import { useSelector } from "react-redux";
 import { getAuthToken } from "../../utils/auth";
 import jwtDecode from "jwt-decode";
@@ -20,9 +20,7 @@ const ReviewTable: React.FC = () => {
   const [currentRound, setCurrentRound] = useState<number>(-1);
   const [sortOrderRow, setSortOrderRow] = useState<"asc" | "desc" | "none">("none");
   const [showToggleQuestion, setShowToggleQuestion] = useState(false);
-  // removed unused 'open' state
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  // store rounds data fetched from backend (array of rounds)
   const [roundsData, setRoundsData] = useState<any[] | null>(null);
   const [assignmentId, setAssignmentId] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -37,24 +35,22 @@ const ReviewTable: React.FC = () => {
   const [showReviews, setShowReviews] = useState(false);
   const [ShowAuthorFeedback, setShowAuthorFeedback] = useState(false);
   const [roundSelected, setRoundSelected] = useState(-1);
+  const [targetReview, setTargetReview] = useState<{roundIndex: number, reviewIndex: number} | null>(null);
   const authUser = useSelector((state: any) => state.authentication?.user);
 
+  // Ref for the reviews section
+  const reviewsSectionRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    // Normalize members data to support both old (string array) and new (object array) formats
     const normalizedMembers = dummyData.members.map((member: any) => {
       if (typeof member === "string") {
-        // Old format: just a string (name)
         return { name: member, username: "" };
       }
-      // New format: object with name and username
       return member;
     });
     setTeamMembers(normalizedMembers);
-
-    // The fetch is now handled by fetchBackend below. We still initialize team members here.
   }, []);
 
-  // fetch backend data for the provided assignment id and convert it to frontend shape
   const fetchBackend = async (id: number) => {
     setIsLoading(true);
     setFetchError(null);
@@ -63,20 +59,14 @@ const ReviewTable: React.FC = () => {
       try {
         res = await axiosClient.get(`/grades/${id}/view_our_scores`);
       } catch (e: any) {
-        // If this endpoint returns 404 or permission denied, try view_all_scores as a fallback
         if (e?.response?.status === 404 || e?.response?.status === 403) {
           try {
             res = await axiosClient.get(`/grades/${id}/view_all_scores`);
-            // if view_all_scores returns object with team_scores (instructor view), prefer that
             if (res && res.data && res.data.team_scores && Object.keys(res.data.team_scores).length > 0) {
-              // pick the first team_scores entry (if the backend keyed by team or included assignment-level data)
-              // team_scores may be a nested object similar to view_our_scores payload
               const maybe = res.data.team_scores;
-              // If team_scores is directly the same shape as view_our_scores
               if (maybe.reviews_of_our_work) {
                 res = { data: maybe };
               } else {
-                // else try to extract first key's value
                 const firstKey = Object.keys(maybe)[0];
                 if (firstKey) {
                   res = { data: maybe[firstKey] };
@@ -84,11 +74,9 @@ const ReviewTable: React.FC = () => {
               }
             }
           } catch (e2: any) {
-            // swallow inner fallback errors; will be handled below
             res = null;
           }
         } else {
-          // rethrow other errors
           throw e;
         }
       }
@@ -99,7 +87,6 @@ const ReviewTable: React.FC = () => {
           .map((k) => backendRoundsObj[k]);
         const converted = convertBackendRoundArray(orderedRounds);
         setRoundsData(converted);
-        // after rounds are fetched, attempt to fetch team metadata for this assignment & current user
         try {
           const token = getAuthToken();
           if (!token || token === "EXPIRED") {
@@ -114,7 +101,6 @@ const ReviewTable: React.FC = () => {
             }
           }
         } catch (err) {
-          // non-fatal: keep rounds but don't block on team metadata
           console.warn("Failed to load team metadata:", err);
         }
         setIsLoading(false);
@@ -135,7 +121,6 @@ const ReviewTable: React.FC = () => {
     }
   };
 
-  // Helper: determine current user id from redux or token fallback
   const getCurrentUserId = (): number | null => {
     if (authUser && authUser.id) return authUser.id;
     const token = getAuthToken();
@@ -148,17 +133,13 @@ const ReviewTable: React.FC = () => {
     }
   };
 
-  // Fetch participant -> team -> team participants -> user details
   const fetchTeamMetadata = async (assignmentIdParam: number, userId: number) => {
     try {
-      // 1) get participants for the given user
       const participantsResp = await axiosClient.get(`/participants/user/${userId}`);
       setLastParticipantsResp(participantsResp?.data || participantsResp);
       const participants = participantsResp?.data || [];
 
-      // find the participant for this assignment
       const myParticipant = participants.find((p: any) => {
-        // many responses use parent_id for assignment id
         return Number(p.parent_id) === Number(assignmentIdParam) || Number(p.assignment_id) === Number(assignmentIdParam);
       });
 
@@ -173,7 +154,6 @@ const ReviewTable: React.FC = () => {
         return;
       }
 
-      // 2) call teams_participants list_participants to get team and participants
       let teamResp;
       let teamObj;
       let teamParticipants: any[] = [];
@@ -183,7 +163,6 @@ const ReviewTable: React.FC = () => {
         teamObj = teamResp?.data?.team;
         teamParticipants = teamResp?.data?.team_participants || [];
       } catch (e: any) {
-        // If forbidden, attempt a fallback using assignment participants endpoint
         const status = e?.response?.status;
         setLastTeamResp(e?.response?.data || e?.response || e);
         if (status === 403) {
@@ -191,9 +170,7 @@ const ReviewTable: React.FC = () => {
           try {
             const assignPartsResp = await axiosClient.get(`/participants/assignment/${assignmentIdParam}`);
             const assignParts = assignPartsResp?.data || [];
-            // find participants with the same team_id
             const matching = assignParts.filter((p: any) => (p.team_id || (p.team && p.team.id)) === Number(teamId));
-            // collect user ids
             const userIdsFromAssign = matching.map((p: any) => p.user_id || (p.participant && p.participant.user_id)).filter(Boolean);
             const uniqueUserIds2 = Array.from(new Set(userIdsFromAssign));
             const userFetches2 = uniqueUserIds2.map((uid) => axiosClient.get(`/users/${uid}`));
@@ -212,7 +189,6 @@ const ReviewTable: React.FC = () => {
             setTeamFetchError(`Fallback via participants/assignment failed: ${e2?.message || String(e2)}`);
           }
         } else {
-          // non-403 error — propagate message
           setTeamFetchError(`Failed to fetch team participants: ${e?.message || String(e)}`);
         }
       }
@@ -221,18 +197,15 @@ const ReviewTable: React.FC = () => {
         setTeamName(teamObj.name || teamObj.team_name || teamObj.display_name || teamName);
         setTeamGrade(teamObj.grade_for_submission ?? teamGrade);
         setTeamComment(teamObj.comment_for_submission ?? teamComment);
-        // attempt to extract submission hyperlinks from the team object
         const links: string[] = [];
         if (teamObj.hyperlinks && Array.isArray(teamObj.hyperlinks)) {
           teamObj.hyperlinks.forEach((l: any) => links.push(String(l)));
         }
         if (teamObj.submitted_hyperlinks) {
-          // try JSON parse first
           try {
             const parsed = JSON.parse(teamObj.submitted_hyperlinks);
             if (Array.isArray(parsed)) parsed.forEach((l: any) => links.push(String(l)));
           } catch (e) {
-            // fallback: extract URLs using regex from YAML or string
             const str = String(teamObj.submitted_hyperlinks);
             const urlRegex = /(https?:\/\/[^\s]+)/g;
             const found = str.match(urlRegex) || [];
@@ -242,7 +215,6 @@ const ReviewTable: React.FC = () => {
         setSubmissionLinks(links.length > 0 ? Array.from(new Set(links)) : null);
       }
 
-      // 3) fetch user details for each team participant (map user_id -> user)
       const sourceParticipants = teamParticipants && teamParticipants.length > 0 ? teamParticipants : [];
       const userIds: number[] = sourceParticipants
         .map((tp: any) => tp.user_id || tp.userId || (tp.participant && tp.participant.user_id))
@@ -261,7 +233,6 @@ const ReviewTable: React.FC = () => {
           .map((u: any) => ({ name: u.full_name || u.fullName || u.name, username: u.name }));
       }
 
-      // If we couldn't fetch user records (e.g., users endpoint blocked), fall back to participant handles
       if (members.length === 0 && sourceParticipants.length > 0) {
         members = sourceParticipants.map((p: any) => ({ name: p.handle || `user_${p.user_id || p.id}`, username: String(p.user_id || p.id || "") }));
         setTeamMembers(members);
@@ -289,10 +260,9 @@ const ReviewTable: React.FC = () => {
   };
 
   const selectRound = (r: number) => {
-    setRoundSelected((prev) => r);
+    setRoundSelected(r);
   };
 
-  // Function to toggle the visibility of ShowAuthorFeedback component
   const toggleAuthorFeedback = () => {
     setShowAuthorFeedback((prev) => !prev);
   };
@@ -305,8 +275,25 @@ const ReviewTable: React.FC = () => {
     setShowToggleQuestion(!showToggleQuestion);
   };
 
+  // Handle clicking on a review cell in the table
+  const handleReviewClick = (roundIndex: number, reviewIndex: number) => {
+    // Show reviews section if not already shown
+    if (!showReviews) {
+      setShowReviews(true);
+    }
+    
+    // Set the target review to expand
+    setTargetReview({ roundIndex, reviewIndex });
+    
+    // Scroll to reviews section after a short delay to allow state to update
+    setTimeout(() => {
+      if (reviewsSectionRef.current) {
+        reviewsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   const renderTable = (roundData: any, roundIndex: number) => {
-    // Normalize data to handle both old (questionNumber/questionText) and new (itemNumber/itemText) field names
     const normalizedData = normalizeReviewDataArray(roundData);
     
     const { averagePeerReviewScore, columnAverages, sortedData } = calculateAverages(
@@ -333,9 +320,15 @@ const ReviewTable: React.FC = () => {
                 </th>
               )}
               {Array.from({ length: roundData[0].reviews.length }, (_, i) => (
-                <th key={i} className="py-2 px-4 text-center" style={{ width: "70px" }}>{`Review ${
-                  i + 1
-                }`}</th>
+                <th 
+                  key={i} 
+                  className="py-2 px-4 text-center" 
+                  style={{ width: "70px", cursor: "pointer", textDecoration: "underline" }}
+                  onClick={() => handleReviewClick(roundIndex, i)}
+                  title="Click to view full review"
+                >
+                  {`Review ${i + 1}`}
+                </th>
               ))}
               <th className="py-2 px-4" style={{ width: "70px" }} onClick={toggleSortOrderRow}>
                 Average
@@ -347,8 +340,13 @@ const ReviewTable: React.FC = () => {
           </thead>
           <tbody>
             {sortedData.map((row, index) => (
-                <ReviewTableRow key={index} row={row} showToggleQuestion={showToggleQuestion} />
-              ))}
+              <ReviewTableRow 
+                key={index} 
+                row={row} 
+                showToggleQuestion={showToggleQuestion}
+                onReviewClick={(reviewIndex) => handleReviewClick(roundIndex, reviewIndex)}
+              />
+            ))}
             <tr className="no-bg">
               <td className="py-2 px-4" style={{ width: "70px" }}>
                 Avg
@@ -374,8 +372,8 @@ const ReviewTable: React.FC = () => {
 
   return (
     <div className="p-4">
-    <h2>Summary Report: Program 2</h2>
-  <h5>Team: {teamName || dummyData.team}</h5>
+      <h2>Summary Report: Program 2</h2>
+      <h5>Team: {teamName || dummyData.team}</h5>
       <div className="mb-3">
         <label htmlFor="assignmentId" className="mr-2">
           Assignment ID:
@@ -411,7 +409,6 @@ const ReviewTable: React.FC = () => {
           <strong>Team metadata:</strong> {teamFetchError}
         </div>
       )}
-      {/* Debug panel - visible to developer to understand responses */}
       <details style={{ marginTop: 8 }}>
         <summary>Debug: last fetch responses</summary>
         <div style={{ whiteSpace: "pre-wrap", fontSize: 12 }}>
@@ -444,7 +441,7 @@ const ReviewTable: React.FC = () => {
         )}
       </div>
 
-  <Statistics roundsSource={roundsData} />
+      <Statistics roundsSource={roundsData} />
 
       <br />
 
@@ -461,9 +458,8 @@ const ReviewTable: React.FC = () => {
         <label htmlFor="toggleQuestion"> &nbsp;{showToggleQuestion ? "Hide item prompts" : "Show item prompts"}</label>
       </div>
 
-      {/* Conditionally render tables based on currentRound */}
       {currentRound === -1
-        ? (roundsData || dummyDataRounds).map((roundData, index) => renderTable(roundData, index)) // Render a table for each round if "All Rounds" is selected
+        ? (roundsData || dummyDataRounds).map((roundData, index) => renderTable(roundData, index))
         : renderTable((roundsData || dummyDataRounds)[currentRound], currentRound)}
 
       <div>
@@ -474,11 +470,16 @@ const ReviewTable: React.FC = () => {
         />
       </div>
 
-      <div>
+      <div ref={reviewsSectionRef}>
         {showReviews && (
           <div>
             <h2>Reviews</h2>
-            <ShowReviews data={roundsData || dummyDataRounds} roundSelected={roundSelected} />
+            <ShowReviews 
+              data={roundsData || dummyDataRounds} 
+              roundSelected={roundSelected}
+              targetReview={targetReview}
+              onReviewExpanded={() => setTargetReview(null)}
+            />
           </div>
         )}
         {ShowAuthorFeedback && (

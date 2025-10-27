@@ -21,6 +21,8 @@ interface Review {
 interface ShowReviewsProps {
   data: Review[][];
   roundSelected: number;
+  targetReview?: {roundIndex: number, reviewIndex: number} | null;
+  onReviewExpanded?: () => void;
 }
 
 // Collapsible Round Component
@@ -29,7 +31,9 @@ const CollapsibleRound: React.FC<{
   roundData: Review[];
   isStudent: boolean;
   expandAll: boolean;
-}> = ({ roundIndex, roundData, isStudent, expandAll }) => {
+  targetReview?: {roundIndex: number, reviewIndex: number} | null;
+  onReviewExpanded?: () => void;
+}> = ({ roundIndex, roundData, isStudent, expandAll, targetReview, onReviewExpanded }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -38,11 +42,18 @@ const CollapsibleRound: React.FC<{
     setIsExpanded(expandAll);
   }, [expandAll]);
 
+  // Auto-expand if this is the target round
+  React.useEffect(() => {
+    if (targetReview && targetReview.roundIndex === roundIndex) {
+      setIsExpanded(true);
+    }
+  }, [targetReview, roundIndex]);
+
   const num_of_questions = roundData.length;
   const num_of_reviews = roundData[0]?.reviews.length || 0;
 
   return (
-    <div style={{ marginBottom: "10px" }}>
+    <div style={{ marginBottom: "10px" }} ref={containerRef}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         style={{ 
@@ -67,7 +78,7 @@ const CollapsibleRound: React.FC<{
       </button>
 
       {isExpanded && (
-        <div ref={containerRef} style={{ padding: "10px 0", display: "table", width: "auto" }}>
+        <div style={{ padding: "10px 0", display: "table", width: "auto" }}>
           {Array.from({ length: num_of_reviews }, (_, i) => (
             <CollapsibleReview
               key={`round-${roundIndex}-review-${i}`}
@@ -75,6 +86,9 @@ const CollapsibleRound: React.FC<{
               roundData={roundData}
               isStudent={isStudent}
               expandAll={expandAll}
+              targetReview={targetReview}
+              roundIndex={roundIndex}
+              onReviewExpanded={onReviewExpanded}
             />
           ))}
         </div>
@@ -89,7 +103,10 @@ const CollapsibleReview: React.FC<{
   roundData: Review[];
   isStudent: boolean;
   expandAll: boolean;
-}> = ({ reviewIndex, roundData, isStudent, expandAll }) => {
+  targetReview?: {roundIndex: number, reviewIndex: number} | null;
+  roundIndex: number;
+  onReviewExpanded?: () => void;
+}> = ({ reviewIndex, roundData, isStudent, expandAll, targetReview, roundIndex, onReviewExpanded }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -98,8 +115,28 @@ const CollapsibleReview: React.FC<{
     setIsExpanded(expandAll);
   }, [expandAll]);
 
+  // Auto-expand and scroll if this is the target review
+  React.useEffect(() => {
+    if (targetReview && 
+        targetReview.roundIndex === roundIndex && 
+        targetReview.reviewIndex === reviewIndex) {
+      setIsExpanded(true);
+      
+      // Scroll to this review after a delay
+      setTimeout(() => {
+        if (contentRef.current) {
+          contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        // Call the callback to clear the target
+        if (onReviewExpanded) {
+          onReviewExpanded();
+        }
+      }, 300);
+    }
+  }, [targetReview, roundIndex, reviewIndex, onReviewExpanded]);
+
   return (
-    <div style={{ marginBottom: "8px", marginLeft: "0" }}>
+    <div style={{ marginBottom: "8px", marginLeft: "0" }} ref={contentRef}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         style={{ 
@@ -124,7 +161,7 @@ const CollapsibleReview: React.FC<{
       </button>
 
       {isExpanded && (
-        <div ref={contentRef} style={{ padding: "15px 20px", display: "inline-block", minWidth: "100%" }}>
+        <div style={{ padding: "15px 20px", display: "inline-block", minWidth: "100%" }}>
           {roundData.map((question, j) => (
             <div key={`question-${j}-review-${reviewIndex}`} className="review-block" style={{ marginBottom: "15px", minWidth: "max-content" }}>
               <div className="question" style={{ fontWeight: "bold", marginBottom: "8px", fontSize: "14px", whiteSpace: "nowrap" }}>
@@ -154,7 +191,7 @@ const CollapsibleReview: React.FC<{
 };
 
 //function for ShowReviews
-const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected }) => {
+const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected, targetReview, onReviewExpanded }) => {
   console.log("round selected: ", roundSelected);
   const rounds = data.length;
   const [expandAllReviews, setExpandAllReviews] = useState(false);
@@ -186,6 +223,8 @@ const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected }) => {
           roundData={data[r]}
           isStudent={isStudent}
           expandAll={expandAllReviews}
+          targetReview={targetReview}
+          onReviewExpanded={onReviewExpanded}
         />
       );
     }
