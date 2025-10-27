@@ -14,7 +14,7 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
   return (
     <tr className={row.maxScore === 1 ? "no-bg" : ""}>
       {/* Item Number */}
-      <td className="py-2 px-4 text-center" data-question={row.itemText}>
+      <td className="py-2 px-4 text-center" data-question="This is the weight.">
         <div className="circle-container">
           {row.maxScore !== 1 ? (
             <span className="circle">{row.maxScore}</span>
