@@ -35,14 +35,20 @@ const TruncatableText: React.FC<{ text: string; wordLimit?: number }> = ({ text,
 
 //props for the ShowReviews
 interface ReviewComment {
-  score: number;
-  comment?: string;
   name: string;
+  score?: number;
+  comment?: string;
+  textResponse?: string;
+  selections?: string[];
+  selectedOption?: string;
+  fileName?: string;
+  fileUrl?: string;
 }
 
 interface Review {
   questionNumber: string;
   questionText: string;
+  itemType?: string;
   reviews: ReviewComment[];
   RowAvg: number;
   maxScore: number;
@@ -200,18 +206,53 @@ const CollapsibleReview: React.FC<{
                 {j + 1}. {question.questionText}
               </div>
               <div className="score-container" style={{ marginLeft: "15px" }}>
-                <span
-                  className={`score ${getColorClass(
-                    question.reviews[reviewIndex].score,
-                    question.maxScore
-                  )}`}
-                >
-                  {question.reviews[reviewIndex].score}
-                </span>
-                {question.reviews[reviewIndex].comment && (
-                  <div className="comment" style={{ marginTop: "5px", fontSize: "14px", color: "#555" }}>
-                    <TruncatableText text={question.reviews[reviewIndex].comment} wordLimit={10} />
+                {question.reviews[reviewIndex].score !== undefined ? (
+                  // Scored items (Scale, Criterion)
+                  <>
+                    <span
+                      className={`score ${getColorClass(
+                        question.reviews[reviewIndex].score!,
+                        question.maxScore
+                      )}`}
+                    >
+                      {question.reviews[reviewIndex].score}
+                    </span>
+                    {question.reviews[reviewIndex].comment && (
+                      <div className="comment" style={{ marginTop: "5px", fontSize: "14px", color: "#555" }}>
+                        <TruncatableText text={question.reviews[reviewIndex].comment!} wordLimit={10} />
+                      </div>
+                    )}
+                  </>
+                ) : question.reviews[reviewIndex].textResponse ? (
+                  // Text items (TextArea, TextField)
+                  <div style={{ fontSize: "14px", color: "#555", fontStyle: "italic" }}>
+                    <TruncatableText text={question.reviews[reviewIndex].textResponse!} wordLimit={15} />
                   </div>
+                ) : question.reviews[reviewIndex].selections ? (
+                  // Multi-select items (Checkbox)
+                  <ul style={{ margin: "5px 0", paddingLeft: "20px", fontSize: "14px" }}>
+                    {question.reviews[reviewIndex].selections!.map((sel, sidx) => (
+                      <li key={sidx}>{sel}</li>
+                    ))}
+                  </ul>
+                ) : question.reviews[reviewIndex].selectedOption ? (
+                  // Single-select items (Dropdown, Radio)
+                  <div style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}>
+                    {question.reviews[reviewIndex].selectedOption}
+                  </div>
+                ) : question.reviews[reviewIndex].fileName ? (
+                  // File upload
+                  <div style={{ fontSize: "14px", color: "#b00404" }}>
+                    {question.reviews[reviewIndex].fileUrl ? (
+                      <a href={question.reviews[reviewIndex].fileUrl} target="_blank" rel="noopener noreferrer">
+                        📎 {question.reviews[reviewIndex].fileName}
+                      </a>
+                    ) : (
+                      <span>📎 {question.reviews[reviewIndex].fileName}</span>
+                    )}
+                  </div>
+                ) : (
+                  <span style={{ color: "#999" }}>No response</span>
                 )}
               </div>
             </div>

@@ -74,22 +74,48 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
       )}
 
       {/* Review Cells - Now clickable */}
-      {row.reviews.map((review, idx) => (
-        <td
-          key={idx}
-          className={`py-2 px-4 text-center ${getColorClass(review.score, row.maxScore)}`}
-          data-question={review.comment}
-          style={{ cursor: onReviewClick ? "pointer" : "default" }}
-          onClick={() => onReviewClick && onReviewClick(idx)}
-          title={onReviewClick ? "Click to view full review" : ""}
-        >
-          <span
-            style={{ textDecoration: review.comment ? "underline" : "none", fontWeight: "bold" }}
+      {row.reviews.map((review, idx) => {
+        // Determine cell content based on item type
+        let cellContent;
+        let bgClass = 'cf';
+
+        if (review.score !== undefined) {
+          // Scored items (Scale, Criterion)
+          bgClass = getColorClass(review.score, row.maxScore);
+          cellContent = (
+            <span style={{ textDecoration: review.comment ? "underline" : "none", fontWeight: "bold" }}>
+              {review.score}
+            </span>
+          );
+        } else if (review.textResponse) {
+          // Text items (TextArea, TextField)
+          cellContent = <span style={{ fontSize: "12px", fontStyle: "italic" }}>{review.textResponse.substring(0, 15)}...</span>;
+        } else if (review.selections && review.selections.length > 0) {
+          // Multi-select items (Checkbox)
+          cellContent = <span style={{ fontSize: "12px" }}>✓ ({review.selections.length})</span>;
+        } else if (review.selectedOption) {
+          // Single-select items (Dropdown, Radio)
+          cellContent = <span style={{ fontSize: "12px" }}>{review.selectedOption}</span>;
+        } else if (review.fileName) {
+          // File upload
+          cellContent = <span style={{ fontSize: "11px", color: "#b00404" }}>📎 {review.fileName.substring(0, 10)}</span>;
+        } else {
+          cellContent = <span>-</span>;
+        }
+
+        return (
+          <td
+            key={idx}
+            className={`py-2 px-4 text-center ${bgClass}`}
+            data-question={review.comment || review.textResponse || ''}
+            style={{ cursor: onReviewClick ? "pointer" : "default" }}
+            onClick={() => onReviewClick && onReviewClick(idx)}
+            title={onReviewClick ? "Click to view full review" : ""}
           >
-            {review.score}
-          </span>
-        </td>
-      ))}
+            {cellContent}
+          </td>
+        );
+      })}
 
       {/* Row Average */}
       <td className="py-2 px-4 text-center">{row.RowAvg.toFixed(2)}</td>

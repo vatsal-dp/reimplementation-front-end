@@ -5,6 +5,7 @@ export const normalizeReviewData = (data: any): ReviewData => {
   return {
     itemNumber: data.itemNumber || data.questionNumber || '',
     itemText: data.itemText || data.questionText || '',
+    itemType: data.itemType || data.questionType,
     reviews: data.reviews || [],
     RowAvg: data.RowAvg || 0,
     maxScore: data.maxScore || 5
@@ -22,11 +23,42 @@ export const convertBackendRoundArray = (backendRounds: any[][]): ReviewData[][]
   return backendRounds.map((backendRound) => {
     if (!Array.isArray(backendRound)) return [];
     return backendRound.map((answersArray: any[], idx: number) => {
-      const reviews = (answersArray || []).map((ans: any) => ({
-        name: ans.reviewer_name || '',
-        score: typeof ans.answer === 'number' ? ans.answer : Number(ans.answer) || 0,
-        comment: ans.comments || '',
-      }));
+      const firstAnswer = answersArray?.[0];
+      const itemType = firstAnswer?.item_type || firstAnswer?.itemType;
+
+      const reviews = (answersArray || []).map((ans: any) => {
+        const review: any = {
+          name: ans.reviewer_name || ans.name || '',
+        };
+
+        // Handle different item types
+        if (ans.answer !== undefined) {
+          if (typeof ans.answer === 'number') {
+            review.score = ans.answer;
+          } else if (typeof ans.answer === 'string') {
+            // Could be text response or selection
+            if (itemType === 'TextArea' || itemType === 'TextField') {
+              review.textResponse = ans.answer;
+            } else if (itemType === 'Dropdown' || itemType === 'MultipleChoiceRadio') {
+              review.selectedOption = ans.answer;
+            } else {
+              review.score = Number(ans.answer) || 0;
+            }
+          } else if (Array.isArray(ans.answer)) {
+            review.selections = ans.answer;
+          }
+        }
+
+        if (ans.comments) review.comment = ans.comments;
+        if (ans.comment) review.comment = ans.comment;
+        if (ans.textResponse) review.textResponse = ans.textResponse;
+        if (ans.fileName || ans.file_name) review.fileName = ans.fileName || ans.file_name;
+        if (ans.fileUrl || ans.file_url) review.fileUrl = ans.fileUrl || ans.file_url;
+        if (ans.selectedOption) review.selectedOption = ans.selectedOption;
+        if (ans.selections) review.selections = ans.selections;
+
+        return review;
+      });
 
       const sum = reviews.reduce((acc: number, r: any) => acc + (r.score || 0), 0);
       const rowAvg = reviews.length ? sum / reviews.length : 0;
@@ -37,6 +69,7 @@ export const convertBackendRoundArray = (backendRounds: any[][]): ReviewData[][]
       return {
         itemNumber: String(idx + 1),
         itemText: (answersArray && answersArray[0] && answersArray[0].txt) || '',
+        itemType,
         reviews,
         RowAvg: rowAvg,
         maxScore,
@@ -67,7 +100,7 @@ export const calculateAverages = (
   let itemCount = 0;
   let totalMaxScore = 0;
   currentRoundData.forEach((row) => {
-    const sum = row.reviews.reduce((acc, val) => acc + val.score, 0);
+    const sum = row.reviews.reduce((acc, val) => acc + (val.score || 0), 0);
     row.RowAvg = sum / row.reviews.length;
     totalAvg = row.RowAvg + totalAvg;
     totalMaxScore = totalMaxScore + row.maxScore;
@@ -83,7 +116,7 @@ export const calculateAverages = (
 
   currentRoundData.forEach((row) => {
     row.reviews.forEach((val, index) => {
-      columnAverages[index] += val.score;
+      columnAverages[index] += (val.score || 0);
     });
   });
 
