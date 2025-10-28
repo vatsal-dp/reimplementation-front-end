@@ -2,6 +2,48 @@ import React, { useState, useEffect } from "react";
 import { getColorClass } from "./utils"; // Importing utility functions
 import { ReviewData } from "./App"; // Importing the ReviewData interface from App
 
+// Truncatable text component
+const TruncatableText: React.FC<{ text: string; wordLimit?: number }> = ({ text, wordLimit = 10 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Handle empty or undefined text
+  if (!text || typeof text !== 'string') {
+    console.log('TruncatableText: Empty or invalid text', text);
+    return <span></span>;
+  }
+
+  const words = text.trim().split(/\s+/);
+  const shouldTruncate = words.length > wordLimit;
+  const displayText = isExpanded || !shouldTruncate
+    ? text
+    : words.slice(0, wordLimit).join(" ");
+
+  console.log('TruncatableText:', { text: text.substring(0, 50), wordCount: words.length, wordLimit, shouldTruncate });
+
+  return (
+    <span>
+      {displayText}
+      {shouldTruncate && (
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsExpanded(!isExpanded);
+            console.log('Truncatable text clicked, isExpanded:', !isExpanded);
+          }}
+          style={{
+            color: "#b00404",
+            cursor: "pointer",
+            fontWeight: "bold",
+            marginLeft: "4px"
+          }}
+        >
+          {isExpanded ? " [show less]" : "..."}
+        </span>
+      )}
+    </span>
+  );
+};
+
 // Props interface for ReviewTableRow component
 interface ReviewTableRowProps {
   row: ReviewData; // Data for the row
@@ -25,7 +67,11 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
         </div>
       </td>
       {/* Toggle Item */}
-      {showToggleQuestion && <td className="item-prompt-cell">{row.itemText}</td>}
+      {showToggleQuestion && (
+        <td className="item-prompt-cell">
+          <TruncatableText text={row.itemText} wordLimit={5} />
+        </td>
+      )}
 
       {/* Review Cells - Now clickable */}
       {row.reviews.map((review, idx) => (
