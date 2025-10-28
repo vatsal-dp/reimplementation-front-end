@@ -440,24 +440,6 @@ const ReviewTable: React.FC = () => {
           </span>
         ))}
       </span>
-      {teamFetchError && (
-        <div style={{ marginTop: 8, color: "orange" }}>
-          <strong>Team metadata:</strong> {teamFetchError}
-        </div>
-      )}
-      <details style={{ marginTop: 8 }}>
-        <summary>Debug: last fetch responses</summary>
-        <div style={{ whiteSpace: "pre-wrap", fontSize: 12 }}>
-          <div>
-            <strong>Participants response:</strong>
-            <pre>{JSON.stringify(lastParticipantsResp, null, 2)}</pre>
-          </div>
-          <div>
-            <strong>Team response:</strong>
-            <pre>{JSON.stringify(lastTeamResp, null, 2)}</pre>
-          </div>
-        </div>
-      </details>
       <div className="mt-2">
         <h5>Submission links</h5>
         {submissionLinks && submissionLinks.length > 0 ? (
