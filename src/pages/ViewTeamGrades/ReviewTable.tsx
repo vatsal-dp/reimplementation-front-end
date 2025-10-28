@@ -349,17 +349,23 @@ const ReviewTable: React.FC = () => {
                   Item
                 </th>
               )}
-              {Array.from({ length: roundData[0].reviews.length }, (_, i) => (
-                <th 
-                  key={i} 
-                  className="py-2 px-4 text-center" 
-                  style={{ width: "70px", cursor: "pointer", textDecoration: "underline" }}
-                  onClick={() => handleReviewClick(roundIndex, i)}
-                  title="Click to view full review"
-                >
-                  {`Review ${i + 1}`}
-                </th>
-              ))}
+              {Array.from({ length: roundData[0].reviews.length }, (_, i) => {
+                const reviewerName = roundData[0].reviews[i]?.name || `Review ${i + 1}`;
+                const isStudent = authUser?.role === "Student";
+                const displayName = isStudent ? `Review ${i + 1}` : reviewerName;
+
+                return (
+                  <th
+                    key={i}
+                    className="py-2 px-4 text-center"
+                    style={{ width: "70px", cursor: "pointer", textDecoration: "underline" }}
+                    onClick={() => handleReviewClick(roundIndex, i)}
+                    title={isStudent ? "Click to view full review" : `Review by ${reviewerName} - Click to view full`}
+                  >
+                    {displayName}
+                  </th>
+                );
+              })}
               <th className="py-2 px-4" style={{ width: "70px" }} onClick={toggleSortOrderRow}>
                 Average
                 {sortOrderRow === "none" && <span>▲▼</span>}
