@@ -56,7 +56,7 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
   return (
     <tr className={row.maxScore === 1 ? "no-bg" : ""}>
       {/* Item Number */}
-      <td className="py-2 px-4 text-center" data-question="This is the weight.">
+      <td className="py-1 px-2 text-center" data-question="This is the weight.">
         <div className="circle-container">
           {row.maxScore !== 1 ? (
             <span className="circle">{row.maxScore}</span>
@@ -106,7 +106,7 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
         return (
           <td
             key={idx}
-            className={`py-2 px-4 text-center ${bgClass}`}
+            className={`py-1 px-2 text-center ${bgClass}`}
             data-question={review.comment || review.textResponse || ''}
             style={{ cursor: onReviewClick ? "pointer" : "default" }}
             onClick={() => onReviewClick && onReviewClick(idx)}
@@ -116,9 +116,6 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
           </td>
         );
       })}
-
-      {/* Row Average */}
-      <td className="py-2 px-4 text-center">{row.RowAvg.toFixed(2)}</td>
     </tr>
   );
 };

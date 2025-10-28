@@ -326,7 +326,7 @@ const ReviewTable: React.FC = () => {
   const renderTable = (roundData: any, roundIndex: number) => {
     const normalizedData = normalizeReviewDataArray(roundData);
     
-    const { averagePeerReviewScore, columnAverages, sortedData } = calculateAverages(
+    const { averagePeerReviewScore, sortedData } = calculateAverages(
       normalizedData,
       sortOrderRow
     );
@@ -341,7 +341,7 @@ const ReviewTable: React.FC = () => {
         <table className="tbl_heat">
           <thead>
             <tr className="bg-gray-200">
-              <th className="py-2 px-4 text-center" style={{ width: "70px" }}>
+              <th className="py-1 px-2 text-center" style={{ width: "50px" }}>
                 Item no.
               </th>
               {showToggleQuestion && (
@@ -357,7 +357,7 @@ const ReviewTable: React.FC = () => {
                 return (
                   <th
                     key={i}
-                    className="py-2 px-4 text-center"
+                    className="py-1 px-2 text-center"
                     style={{ width: "70px", cursor: "pointer", textDecoration: "underline" }}
                     onClick={() => handleReviewClick(roundIndex, i)}
                     title={isStudent ? "Click to view full review" : `Review by ${reviewerName} - Click to view full`}
@@ -366,12 +366,6 @@ const ReviewTable: React.FC = () => {
                   </th>
                 );
               })}
-              <th className="py-2 px-4" style={{ width: "70px" }} onClick={toggleSortOrderRow}>
-                Average
-                {sortOrderRow === "none" && <span>▲▼</span>}
-                {sortOrderRow === "asc" && <span> ▲</span>}
-                {sortOrderRow === "desc" && <span> ▼</span>}
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -383,17 +377,6 @@ const ReviewTable: React.FC = () => {
                 onReviewClick={(reviewIndex) => handleReviewClick(roundIndex, reviewIndex)}
               />
             ))}
-            <tr className="no-bg">
-              <td className="py-2 px-4" style={{ width: "70px" }}>
-                Avg
-              </td>
-              {showToggleQuestion && <td></td>}
-              {columnAverages.map((avg, index) => (
-                <td key={index} className="py-2 px-4 text-center">
-                  {avg.toFixed(2)}
-                </td>
-              ))}
-            </tr>
           </tbody>
         </table>
         <br />

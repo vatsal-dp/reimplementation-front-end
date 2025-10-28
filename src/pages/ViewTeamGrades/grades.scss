@@ -128,7 +128,7 @@
 
 .tbl_heat td {
   cursor: pointer;
-  padding: 4px;
+  padding: 2px;
   border: 1px black solid;
   width: auto;
   font-size: 15px;
@@ -153,7 +153,7 @@
 /* Styling for table headers */
 .tbl_heat th {
   border: 1px black solid;
-  padding: 6px;
+  padding: 3px;
   font-size: 15px;
   line-height: 1.428em;
   background-color: #f2f2f2;
@@ -172,12 +172,12 @@
 /* Left-align item prompt header and cells */
 .item-prompt-header {
   text-align: left !important;
-  padding: 6px;
+  padding: 3px;
 }
 
 .item-prompt-cell {
   text-align: left !important;
-  padding: 4px;
+  padding: 2px;
 }
 
 /* Hides padding for specific rows */
