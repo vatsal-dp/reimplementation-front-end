@@ -28,6 +28,8 @@
 /* Set the maximum width of the table container */
 .table-container {
   max-width: 90%;
+  overflow-x: auto;
+  overflow-y: visible;
 }
 
 /* Circle around max score number */
@@ -159,6 +161,14 @@
   table-layout: fixed;
 }
 
+/* Sticky Item (prompt) column header - second column */
+.tbl_heat th:nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: #f2f2f2;
+}
+
 /* Left-align item prompt header and cells */
 .item-prompt-header {
   text-align: left !important;
@@ -173,6 +183,22 @@
 /* Hides padding for specific rows */
 .hiddenRow {
   padding: 0 !important;
+}
+
+/* Sticky Item (prompt) column cells - second column */
+.tbl_heat td:nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 9;
+  background-color: #ffffff;
+}
+
+/* Sticky Item (prompt) column in the average row */
+.no-bg td:nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 9;
+  background-color: #ffffff;
 }
 
 /* Tooltip span styling */
