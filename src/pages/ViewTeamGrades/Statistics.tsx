@@ -92,7 +92,6 @@ const Statistics: React.FC<StatisticsProps> = ({ roundsSource = null }) => {
             <th>Submitted work (avg)</th>
             <th>Author feedback (avg)</th>
             <th>Teammate review (avg)</th>
-            <th>Final score</th>
           </tr>
         </thead>
         <tbody>
@@ -114,18 +113,12 @@ const Statistics: React.FC<StatisticsProps> = ({ roundsSource = null }) => {
               teammateData[index]?.reviews.reduce((acc, review) => acc + review.score, 0) /
               teammateData[index]?.reviews.length;
 
-            const finalScore = (
-              (Number(submittedWorkAvg) + Number(authorFeedbackAvg) + Number(teammateReviewAvg)) /
-              3
-            ).toFixed(2); // Average of all three categories
-
             return (
               <tr key={index}>
                 <td>Round {index + 1}</td>
                 <td>{Number(submittedWorkAvg).toFixed(2)}</td>
                 <td>{authorFeedbackAvg?.toFixed(2) || "N/A"}</td>
                 <td>{teammateReviewAvg?.toFixed(2) || "N/A"}</td>
-                <td>{finalScore}</td>
               </tr>
             );
           })}
