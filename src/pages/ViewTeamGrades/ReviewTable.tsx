@@ -8,7 +8,6 @@ import { calculateAverages, normalizeReviewDataArray, convertBackendRoundArray }
 import { TeamMember } from "./App";
 import "./grades.scss";
 import { Link } from "react-router-dom";
-import Statistics from "./Statistics";
 import Filters from "./Filters";
 import ShowReviews from "./ShowReviews";
 import dummyauthorfeedback from "./Data/authorFeedback.json";
@@ -48,7 +47,6 @@ const TruncatableText: React.FC<{ text: string; wordLimit?: number }> = ({ text,
 
 const ReviewTable: React.FC = () => {
   const [currentRound, setCurrentRound] = useState<number>(-1);
-  const [sortOrderRow, setSortOrderRow] = useState<"asc" | "desc" | "none">("none");
   const [showToggleQuestion, setShowToggleQuestion] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [roundsData, setRoundsData] = useState<any[] | null>(null);
@@ -66,6 +64,7 @@ const ReviewTable: React.FC = () => {
   const [ShowAuthorFeedback, setShowAuthorFeedback] = useState(false);
   const [roundSelected, setRoundSelected] = useState(-1);
   const [targetReview, setTargetReview] = useState<{roundIndex: number, reviewIndex: number} | null>(null);
+  const [averageFinalScore, setAverageFinalScore] = useState<string | number | null>(null);
   const authUser = useSelector((state: any) => state.authentication?.user);
 
   // Ref for the reviews section
@@ -80,6 +79,15 @@ const ReviewTable: React.FC = () => {
     });
     setTeamMembers(normalizedMembers);
   }, []);
+
+  // When roundsData is loaded, automatically select the first round
+  useEffect(() => {
+    if (roundsData && roundsData.length > 0 && roundSelected === -1) {
+      setRoundSelected(0);
+    }
+  }, [roundsData, roundSelected]);
+
+
 
   const fetchBackend = async (id: number) => {
     setIsLoading(true);
@@ -117,6 +125,20 @@ const ReviewTable: React.FC = () => {
           .map((k) => backendRoundsObj[k]);
         const converted = convertBackendRoundArray(orderedRounds);
         setRoundsData(converted);
+        
+        // Set average final score from API response
+        console.log("=== API Response Data ===");
+        console.log("Full res.data:", res.data);
+        console.log("avg_score_of_our_work value:", res.data.avg_score_of_our_work);
+        console.log("Type:", typeof res.data.avg_score_of_our_work);
+        
+        if (res.data.avg_score_of_our_work !== undefined && res.data.avg_score_of_our_work !== null) {
+          console.log("Setting averageFinalScore to:", res.data.avg_score_of_our_work);
+          setAverageFinalScore(res.data.avg_score_of_our_work);
+        } else {
+          console.log("avg_score_of_our_work is not available in response");
+        }
+        
         try {
           const token = getAuthToken();
           if (!token || token === "EXPIRED") {
@@ -277,14 +299,6 @@ const ReviewTable: React.FC = () => {
     }
   };
 
-  const toggleSortOrderRow = () => {
-    setSortOrderRow((prevSortOrder) => {
-      if (prevSortOrder === "asc") return "desc";
-      if (prevSortOrder === "desc") return "none";
-      return "asc";
-    });
-  };
-
   const toggleShowReviews = () => {
     setShowReviews((prev) => !prev);
   };
@@ -328,7 +342,7 @@ const ReviewTable: React.FC = () => {
     
     const { averagePeerReviewScore, sortedData } = calculateAverages(
       normalizedData,
-      sortOrderRow
+      "none"
     );
 
     const roundsSource = roundsData || dummyDataRounds;
@@ -423,6 +437,9 @@ const ReviewTable: React.FC = () => {
           </span>
         ))}
       </span>
+      <div className="ml-4 mt-2">
+        Average final score: <span style={{ fontWeight: "normal" }}>{averageFinalScore || "N/A"}</span>
+      </div>
       <div className="mt-2">
         <h5>Submission links</h5>
         {submissionLinks && submissionLinks.length > 0 ? (
@@ -441,8 +458,6 @@ const ReviewTable: React.FC = () => {
           </div>
         )}
       </div>
-
-      <Statistics roundsSource={roundsData} />
 
       <br />
 
