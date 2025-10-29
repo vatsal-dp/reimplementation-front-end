@@ -421,7 +421,7 @@ const ReviewTable: React.FC = () => {
         />
         <button
           onClick={() => fetchBackend(assignmentId)}
-          className="btn btn-primary px-3"
+          className="round-button mr-4"
           disabled={isLoading}
         >
           {isLoading ? "Loading..." : "Load"}
