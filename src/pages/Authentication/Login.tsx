@@ -30,7 +30,7 @@ const Login: React.FC = () => {
 
   const onSubmit = (values: ILoginFormValues, submitProps: FormikHelpers<ILoginFormValues>) => {
     axios
-      .post("http://localhost:3002/login", values)
+      .post("http://10.40.129.187:3002/api/v1", values)
       .then((response) => {
         const payload = setAuthToken(response.data.token);
 
