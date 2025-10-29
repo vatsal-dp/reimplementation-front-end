@@ -11,7 +11,16 @@ export interface TeamMember {
 export interface ReviewData {
   itemNumber: string;
   itemText: string;
-  reviews: { score: number; comment?: string }[]; // Array of objects with score and optional comment
+  itemType?: string; // Type of item (Scale, Criterion, TextArea, etc.)
+  reviews: {
+    score?: number;
+    comment?: string;
+    textResponse?: string; // For TextArea/TextField
+    selections?: string[]; // For Checkbox/MultipleChoice
+    selectedOption?: string; // For Dropdown/Radio
+    fileName?: string; // For file uploads
+    fileUrl?: string;
+  }[];
   RowAvg: number; // Average score for the row
   maxScore: number; // Maximum possible score
 }

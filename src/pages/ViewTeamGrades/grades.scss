@@ -1,6 +1,35 @@
+/* ViewTeamGrades Page Typography Guidelines */
+/* Apply font family to the entire page container */
+.p-4 {
+  font-family: verdana, arial, helvetica, sans-serif;
+}
+
+/* Main headings (h2) */
+.p-4 h2 {
+  font-family: verdana, arial, helvetica, sans-serif;
+}
+
+/* Subheadings (h5) */
+.p-4 h5 {
+  font-size: 1.2em;
+  line-height: 18px;
+  font-family: verdana, arial, helvetica, sans-serif;
+}
+
+/* Standard text elements - excluding review sections */
+.p-4 > div:not([class*="review"]) p,
+.p-4 > div:not([class*="review"]) span,
+.p-4 > div:not([class*="review"]) label,
+.p-4 label {
+  font-size: 13px;
+  line-height: 30px;
+}
+
 /* Set the maximum width of the table container */
 .table-container {
   max-width: 90%;
+  overflow-x: auto;
+  overflow-y: visible;
 }
 
 /* Circle around max score number */
@@ -91,7 +120,7 @@
 .tbl_heat {
   border: 1px solid black;
   width: 100%;
-  font-size: 10px;
+  font-size: 15px;
   text-align: center;
   table-layout: fixed;
   min-width: 600px; // Minimum width before scrolling kicks in
@@ -99,10 +128,11 @@
 
 .tbl_heat td {
   cursor: pointer;
-  padding: 8px;
+  padding: 2px;
   border: 1px black solid;
   width: auto;
-  font-size: 11px;
+  font-size: 15px;
+  line-height: 1.428em;
   table-layout: fixed;
   position: relative;
 }
@@ -123,27 +153,52 @@
 /* Styling for table headers */
 .tbl_heat th {
   border: 1px black solid;
-  padding: 10px;
-  font-size: 11px;
+  padding: 3px;
+  font-size: 15px;
+  line-height: 1.428em;
   background-color: #f2f2f2;
   width: auto;
   table-layout: fixed;
 }
 
+/* Sticky Item (prompt) column header - second column */
+.tbl_heat th:nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: #f2f2f2;
+}
+
 /* Left-align item prompt header and cells */
 .item-prompt-header {
   text-align: left !important;
-  padding: 10px;
+  padding: 3px;
 }
 
 .item-prompt-cell {
   text-align: left !important;
-  padding: 8px;
+  padding: 2px;
 }
 
 /* Hides padding for specific rows */
 .hiddenRow {
   padding: 0 !important;
+}
+
+/* Sticky Item (prompt) column cells - second column */
+.tbl_heat td:nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 9;
+  background-color: #ffffff;
+}
+
+/* Sticky Item (prompt) column in the average row */
+.no-bg td:nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 9;
+  background-color: #ffffff;
 }
 
 /* Tooltip span styling */

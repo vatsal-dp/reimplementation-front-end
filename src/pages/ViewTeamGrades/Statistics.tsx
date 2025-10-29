@@ -7,14 +7,17 @@ import dummyauthorfeedback from "./Data/authorFeedback.json"; // Importing dummy
 import teammateData from "./Data/teammateData.json";
 
 //props for statistics component
-interface StatisticsProps {}
+interface StatisticsProps {
+  roundsSource?: any[] | null;
+}
 
 //statistics component
-const Statistics: React.FC<StatisticsProps> = () => {
+const Statistics: React.FC<StatisticsProps> = ({ roundsSource = null }) => {
   const [sortedData, setSortedData] = useState<any[]>([]);
   useEffect(() => {
     // Normalize data to handle both old and new field names
-    const normalizedData = normalizeReviewDataArray(dummyDataRounds[0]);
+    const referenceRounds = roundsSource || dummyDataRounds;
+    const normalizedData = normalizeReviewDataArray(referenceRounds[0]);
     const { averagePeerReviewScore, columnAverages, sortedData } = calculateAverages(
       normalizedData,
       "asc"
@@ -54,19 +57,22 @@ const Statistics: React.FC<StatisticsProps> = () => {
 
   //calculation for total reviews recieved
   let totalReviewsForQuestion1: number = 0;
-  dummyDataRounds.forEach((round) => {
-    round.forEach((question) => {
-      if (question.questionNumber === "1") {
-        totalReviewsForQuestion1 += question.reviews.length;
+  const roundsSourceLocal = roundsSource || dummyDataRounds;
+  roundsSourceLocal.forEach((round: any[]) => {
+    round.forEach((question: any) => {
+      const qNum = (question?.questionNumber ?? question?.itemNumber ?? "").toString();
+      if (qNum === "1") {
+        totalReviewsForQuestion1 += (question.reviews || []).length;
       }
     });
   });
   //calculation for total feedback recieved
   let totalfeedbackForQuestion1: number = 0;
-  dummyauthorfeedback.forEach((round) => {
-    round.forEach((question) => {
-      if (question.questionNumber === "1") {
-        totalfeedbackForQuestion1 += question.reviews.length;
+  dummyauthorfeedback.forEach((round: any[]) => {
+    round.forEach((question: any) => {
+      const qNum = (question?.questionNumber ?? question?.itemNumber ?? "").toString();
+      if (qNum === "1") {
+        totalfeedbackForQuestion1 += (question.reviews || []).length;
       }
     });
   });
@@ -78,19 +84,18 @@ const Statistics: React.FC<StatisticsProps> = () => {
 
   return (
     <div className="table-container mb-6">
-      <h5 className="font-semibold">Round Summary</h5>
+      <h5>Round Summary</h5>
       <table className="tbl_heat">
         <thead>
           <tr>
             <th>Round</th>
-            <th>Submitted Work (Avg)</th>
-            <th>Author Feedback (Avg)</th>
-            <th>Teammate Review (Avg)</th>
-            <th>Final Score</th>
+            <th>Submitted work (avg)</th>
+            <th>Author feedback (avg)</th>
+            <th>Teammate review (avg)</th>
           </tr>
         </thead>
         <tbody>
-          {dummyDataRounds.map((roundData, index) => {
+          {(roundsSource || dummyDataRounds).map((roundData, index) => {
             // Normalize data to handle both old and new field names
             const normalizedData = normalizeReviewDataArray(roundData);
             // Calculate averages for each category using data from utils or manually.
@@ -108,18 +113,12 @@ const Statistics: React.FC<StatisticsProps> = () => {
               teammateData[index]?.reviews.reduce((acc, review) => acc + review.score, 0) /
               teammateData[index]?.reviews.length;
 
-            const finalScore = (
-              (Number(submittedWorkAvg) + Number(authorFeedbackAvg) + Number(teammateReviewAvg)) /
-              3
-            ).toFixed(2); // Average of all three categories
-
             return (
               <tr key={index}>
                 <td>Round {index + 1}</td>
                 <td>{Number(submittedWorkAvg).toFixed(2)}</td>
                 <td>{authorFeedbackAvg?.toFixed(2) || "N/A"}</td>
                 <td>{teammateReviewAvg?.toFixed(2) || "N/A"}</td>
-                <td>{finalScore}</td>
               </tr>
             );
           })}

@@ -7,7 +7,7 @@ import { getAuthToken } from "./auth";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:3002/api/v1",
-  timeout: 1000,
+  timeout: 30000, // 30 seconds - increased from 1 second to handle complex grade queries
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
