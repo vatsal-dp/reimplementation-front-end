@@ -191,12 +191,12 @@
 /* Left-align item prompt header and cells */
 .item-prompt-header {
   text-align: left !important;
-  padding: 3px;
+  padding: 3px 12px 3px 12px; /* add left/right padding for breathing room */
 }
 
 .item-prompt-cell {
   text-align: left !important;
-  padding: 2px;
+  padding: 6px 12px 6px 12px; /* increase left padding so item text isn't flush to the cell edge */
 }
 
 /* Hides padding for specific rows */
@@ -210,6 +210,7 @@
   left: 0;
   z-index: 9;
   background-color: #ffffff;
+  padding-left: 12px; /* ensure sticky cell retains left padding */
 }
 
 /* Sticky Item (prompt) column in the average row */
