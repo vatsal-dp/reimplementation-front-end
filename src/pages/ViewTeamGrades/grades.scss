@@ -17,9 +17,9 @@
 }
 
 /* Standard text elements - excluding review sections */
-.p-4 > div:not([class*="review"]) p,
-.p-4 > div:not([class*="review"]) span,
-.p-4 > div:not([class*="review"]) label,
+.p-4>div:not([class*="review"]) p,
+.p-4>div:not([class*="review"]) span,
+.p-4>div:not([class*="review"]) label,
 .p-4 label {
   font-size: 13px;
   line-height: 30px;
@@ -44,8 +44,10 @@
 .item-number-with-weight {
   display: flex;
   align-items: center;
-  justify-content: center; /* keep centered in the cell */
-  gap: 8px; /* space between number and weight */
+  justify-content: center;
+  /* keep centered in the cell */
+  gap: 8px;
+  /* space between number and weight */
 }
 
 .item-number {
@@ -156,17 +158,24 @@
   position: relative;
 }
 
-/* Tooltip display for question text on hover */
+/* Tooltip display for data-question on weight only (or td fallback) */
+.tbl_heat .weight-circle[data-question]:hover::after,
 .tbl_heat td[data-question]:hover::after {
   content: attr(data-question);
   position: absolute;
-  background-color: rgba($color: #000000, $alpha: 1);
+  background-color: rgba(0, 0, 0, 1);
   color: #ffffff;
   padding: 4px;
   border-radius: 4px;
   bottom: 130%;
   left: 0%;
   white-space: nowrap;
+  z-index: 50;
+}
+
+/* Ensure the tooltip is positioned relative to the weight circle when used */
+.tbl_heat .weight-circle[data-question] {
+  position: relative;
 }
 
 /* Styling for table headers */
@@ -191,12 +200,14 @@
 /* Left-align item prompt header and cells */
 .item-prompt-header {
   text-align: left !important;
-  padding: 3px 12px 3px 12px; /* add left/right padding for breathing room */
+  padding: 3px 12px 3px 12px;
+  /* add left/right padding for breathing room */
 }
 
 .item-prompt-cell {
   text-align: left !important;
-  padding: 6px 12px 6px 12px; /* increase left padding so item text isn't flush to the cell edge */
+  padding: 6px 12px 6px 12px;
+  /* increase left padding so item text isn't flush to the cell edge */
 }
 
 /* Hides padding for specific rows */
@@ -210,7 +221,8 @@
   left: 0;
   z-index: 9;
   background-color: #ffffff;
-  padding-left: 12px; /* ensure sticky cell retains left padding */
+  padding-left: 12px;
+  /* ensure sticky cell retains left padding */
 }
 
 /* Sticky Item (prompt) column in the average row */
