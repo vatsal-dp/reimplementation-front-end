@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { getColorClass } from "./utils";
 import { RootState } from "../../store/store";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 // Truncatable text component
 const TruncatableText: React.FC<{ text: string; wordLimit?: number }> = ({ text, wordLimit = 10 }) => {
@@ -111,7 +111,7 @@ const CollapsibleRound: React.FC<{
         }}
       >
         <span style={{ fontSize: "10px" }}>{isExpanded ? "▼" : "▶"}</span>
-        <span>Round {roundIndex + 1}({num_of_reviews} reviews, {num_of_questions} questions)</span>
+  <span>Round {roundIndex + 1}({num_of_reviews} reviews, {num_of_questions} items)</span>
       </button>
 
       {isExpanded && (
@@ -195,7 +195,7 @@ const CollapsibleReview: React.FC<{
         }}
       >
         <span style={{ fontSize: "10px" }}>{isExpanded ? "▼" : "▶"}</span>
-        <span>Review {reviewIndex + 1} ({roundData.length} questions)</span>
+  <span>Review {reviewIndex + 1} ({roundData.length} items)</span>
       </button>
 
       {isExpanded && (
