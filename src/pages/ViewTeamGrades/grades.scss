@@ -40,6 +40,25 @@
   gap: 6px;
 }
 
+/* New layout for item number with weight to the right */
+.item-number-with-weight {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* keep centered in the cell */
+  gap: 8px; /* space between number and weight */
+}
+
+.item-number {
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+.weight-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .circle {
   width: 15px;
   height: 15px;
@@ -230,7 +249,6 @@
 /* Styling for tag heat grid */
 .tag_heat_grid {
   padding: 0;
-  spacing: 0;
   border: 1px solid black;
   position: relative;
   float: right;

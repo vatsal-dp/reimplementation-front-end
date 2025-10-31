@@ -55,15 +55,17 @@ interface ReviewTableRowProps {
 const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion, onReviewClick }) => {
   return (
     <tr className={row.maxScore === 1 ? "no-bg" : ""}>
-      {/* Item Number */}
+      {/* Item Number with weight to the right */}
       <td className="py-1 px-2 text-center" data-question="This is the weight.">
-        <div className="circle-container">
-          {row.maxScore !== 1 ? (
-            <span className="circle">{row.maxScore}</span>
-          ) : (
-            <span className="tick">✓</span>
-          )}
-          {row.itemNumber}
+        <div className="item-number-with-weight">
+          <span className="item-number">{row.itemNumber}</span>
+          <span className="weight-circle">
+            {row.maxScore !== 1 ? (
+              <span className="circle">{row.maxScore}</span>
+            ) : (
+              <span className="tick">✓</span>
+            )}
+          </span>
         </div>
       </td>
       {/* Toggle Item */}
