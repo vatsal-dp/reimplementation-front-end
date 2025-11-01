@@ -70,7 +70,7 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, showToggleQuestion
       </td>
       {/* Toggle Item */}
       {showToggleQuestion && (
-        <td className="item-prompt-cell">
+        <td className="item-prompt-cell" data-tooltip={row.itemText}>
           <TruncatableText text={row.itemText} wordLimit={5} />
         </td>
       )}

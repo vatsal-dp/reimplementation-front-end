@@ -163,19 +163,50 @@
 .tbl_heat td[data-question]:hover::after {
   content: attr(data-question);
   position: absolute;
-  background-color: rgba(0, 0, 0, 1);
+  background-color: rgba(0, 0, 0, 0.95);
   color: #ffffff;
-  padding: 4px;
+  padding: 8px 12px;
   border-radius: 4px;
   bottom: 130%;
   left: 0%;
-  white-space: nowrap;
-  z-index: 50;
+  white-space: normal;
+  max-width: 400px;
+  width: max-content;
+  z-index: 100;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
 }
 
 /* Ensure the tooltip is positioned relative to the weight circle when used */
 .tbl_heat .weight-circle[data-question] {
   position: relative;
+}
+
+/* Tooltip for item prompt cells */
+.item-prompt-cell[data-tooltip] {
+  position: relative;
+
+  &:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    bottom: 100%;
+    left: 0;
+    white-space: normal;
+    max-width: 400px;
+    width: max-content;
+    z-index: 100;
+    font-size: 13px;
+    line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    word-wrap: break-word;
+    margin-bottom: 4px;
+  }
 }
 
 /* Styling for table headers */
