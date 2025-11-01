@@ -315,14 +315,14 @@ const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected, targetRe
               style={{
                 background: expandAllReviews ? "#b00404" : "transparent",
                 border: "2px solid #b00404",
-                borderRadius: "2px",
                 cursor: "pointer",
                 padding: "10px 20px",
                 color: expandAllReviews ? "white" : "#b00404",
                 fontWeight: "bold",
                 fontSize: "14px",
                 fontFamily: "verdana, arial, helvetica, sans-serif",
-                transition: "background-color 0.3s ease, color 0.3s ease"
+                transition: "background-color 0.3s ease, color 0.3s ease",
+                borderRadius: '0.375rem'
               }}
             >
               {expandAllReviews ? "Hide all reviews" : "Show all reviews"}

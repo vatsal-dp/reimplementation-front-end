@@ -16,6 +16,7 @@ const RoundSelector: React.FC<RoundSelectorProps> = ({ currentRound, handleRound
         <button
           className={`round-button mr-4 ${currentRound === -1 ? "current" : ""}`}
           onClick={() => handleRoundChange(-1)}
+          style={{ borderRadius: '0.375rem' }}
         >
           All Rounds
         </button>
@@ -25,6 +26,7 @@ const RoundSelector: React.FC<RoundSelectorProps> = ({ currentRound, handleRound
             key={index}
             className={`round-button mr-4 ${currentRound === index ? "current" : ""}`}
             onClick={() => handleRoundChange(index)}
+            style={{ borderRadius: '0.375rem' }}
           >
             Round {index + 1}
           </button>

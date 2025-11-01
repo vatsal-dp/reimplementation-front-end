@@ -418,11 +418,13 @@ const ReviewTable: React.FC = () => {
           onChange={(e) => setAssignmentId(Number(e.target.value))}
           className="border px-2 mr-2"
           style={{ width: 100 }}
+          min="1"
         />
         <button
           onClick={() => fetchBackend(assignmentId)}
           className="round-button mr-4"
           disabled={isLoading}
+          style={{ borderRadius: '0.375rem' }}
         >
           {isLoading ? "Loading..." : "Load"}
         </button>
