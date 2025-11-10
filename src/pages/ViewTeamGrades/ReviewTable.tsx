@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import ReviewTableRow from "./ReviewTableRow";
 import RoundSelector from "./RoundSelector";
-import dummyDataRounds from "./Data/heatMapData.json";
-import dummyData from "./Data/dummyData.json";
 import axiosClient from "../../utils/axios_client";
 import { calculateAverages, normalizeReviewDataArray, convertBackendRoundArray } from "./utils";
 import { TeamMember } from "./App";
@@ -10,7 +8,6 @@ import "./grades.scss";
 import { Link } from "react-router-dom";
 import Filters from "./Filters";
 import ShowReviews from "./ShowReviews";
-import dummyauthorfeedback from "./Data/authorFeedback.json";
 import { useSelector } from "react-redux";
 import { getAuthToken } from "../../utils/auth";
 import jwtDecode from "jwt-decode";
@@ -53,9 +50,9 @@ const ReviewTable: React.FC = () => {
   const [assignmentId, setAssignmentId] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [teamName, setTeamName] = useState<string>(dummyData.team || "");
-  const [teamGrade, setTeamGrade] = useState<number | string>(dummyData.grade || "");
-  const [teamComment, setTeamComment] = useState<string>(dummyData.comment || "");
+  const [teamName, setTeamName] = useState<string>("");
+  const [teamGrade, setTeamGrade] = useState<number | string>("");
+  const [teamComment, setTeamComment] = useState<string>("");
   const [submissionLinks, setSubmissionLinks] = useState<string[] | null>(null);
   const [teamFetchError, setTeamFetchError] = useState<string | null>(null);
   const [lastParticipantsResp, setLastParticipantsResp] = useState<any>(null);
@@ -70,14 +67,10 @@ const ReviewTable: React.FC = () => {
   // Ref for the reviews section
   const reviewsSectionRef = useRef<HTMLDivElement>(null);
 
+  // Auto-fetch assignment 1 on mount
   useEffect(() => {
-    const normalizedMembers = dummyData.members.map((member: any) => {
-      if (typeof member === "string") {
-        return { name: member, username: "" };
-      }
-      return member;
-    });
-    setTeamMembers(normalizedMembers);
+    fetchBackend(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // When roundsData is loaded, automatically select the first round
@@ -345,7 +338,7 @@ const ReviewTable: React.FC = () => {
       "none"
     );
 
-    const roundsSource = roundsData || dummyDataRounds;
+    const roundsSource = roundsData || [];
 
     return (
       <div key={roundIndex} className="table-container mb-6">
@@ -406,7 +399,7 @@ const ReviewTable: React.FC = () => {
   return (
     <div className="p-4">
       <h2>Summary Report: Program 2</h2>
-      <h5>Team: {teamName || dummyData.team}</h5>
+      <h5>Team: {teamName || "Loading..."}</h5>
       <div className="mb-3">
         <label htmlFor="assignmentId" className="mr-2">
           Assignment ID:
@@ -459,11 +452,16 @@ const ReviewTable: React.FC = () => {
             <em>No submission links found for this team.</em>
           </div>
         )}
+        {teamFetchError && (
+          <div style={{ color: "red", marginTop: 8, whiteSpace: "pre-wrap" }}>
+            {teamFetchError}
+          </div>
+        )}
       </div>
 
       <br />
 
-      <RoundSelector currentRound={currentRound} handleRoundChange={handleRoundChange} />
+      <RoundSelector currentRound={currentRound} handleRoundChange={handleRoundChange} roundsData={roundsData} />
 
       <div className="toggle-container">
         <input
@@ -476,9 +474,15 @@ const ReviewTable: React.FC = () => {
         <label htmlFor="toggleQuestion"> &nbsp;{showToggleQuestion ? "Hide item prompts" : "Show item prompts"}</label>
       </div>
 
-      {currentRound === -1
-        ? (roundsData || dummyDataRounds).map((roundData, index) => renderTable(roundData, index))
-        : renderTable((roundsData || dummyDataRounds)[currentRound], currentRound)}
+      {roundsData && roundsData.length > 0 ? (
+        currentRound === -1
+          ? roundsData.map((roundData: any, index: number) => renderTable(roundData, index))
+          : renderTable(roundsData[currentRound], currentRound)
+      ) : (
+        <div style={{ padding: "20px", textAlign: "center" }}>
+          {isLoading ? "Loading review data..." : "No review data available. Please load an assignment."}
+        </div>
+      )}
 
       <div>
         <Filters
@@ -489,11 +493,11 @@ const ReviewTable: React.FC = () => {
       </div>
 
       <div ref={reviewsSectionRef}>
-        {showReviews && (
+        {showReviews && roundsData && roundsData.length > 0 && (
           <div>
             <h2>Reviews</h2>
             <ShowReviews 
-              data={roundsData || dummyDataRounds} 
+              data={roundsData} 
               roundSelected={roundSelected}
               targetReview={targetReview}
               onReviewExpanded={() => setTargetReview(null)}
@@ -503,17 +507,18 @@ const ReviewTable: React.FC = () => {
         {ShowAuthorFeedback && (
           <div>
             <h2>Author Feedback</h2>
-            <ShowReviews data={dummyauthorfeedback} roundSelected={roundSelected} />
+            <p style={{ fontStyle: "italic", color: "#666" }}>Author feedback feature coming soon.</p>
           </div>
         )}
       </div>
 
-      <div className="mt-4">
-        <h2>Grade and Comment for Submission</h2>
-        <p>Grade: {teamGrade ?? dummyData.grade}</p>
-        <p>Comment: <TruncatableText text={teamComment ?? dummyData.comment} wordLimit={10} /></p>
-        <p>Late penalty: {dummyData.late_penalty}</p>
-      </div>
+      {teamGrade || teamComment ? (
+        <div className="mt-4">
+          <h2>Grade and Comment for Submission</h2>
+          {teamGrade && <p>Grade: {teamGrade}</p>}
+          {teamComment && <p>Comment: <TruncatableText text={teamComment} wordLimit={10} /></p>}
+        </div>
+      ) : null}
 
       <Link to="/">Back</Link>
     </div>
