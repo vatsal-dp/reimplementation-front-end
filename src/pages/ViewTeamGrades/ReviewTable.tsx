@@ -5,7 +5,7 @@ import axiosClient from "../../utils/axios_client";
 import { calculateAverages, normalizeReviewDataArray, convertBackendRoundArray } from "./utils";
 import { TeamMember } from "./App";
 import "./grades.scss";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Filters from "./Filters";
 import ShowReviews from "./ShowReviews";
 import { useSelector } from "react-redux";
@@ -43,11 +43,16 @@ const TruncatableText: React.FC<{ text: string; wordLimit?: number }> = ({ text,
 };
 
 const ReviewTable: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const [currentRound, setCurrentRound] = useState<number>(-1);
   const [showToggleQuestion, setShowToggleQuestion] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [roundsData, setRoundsData] = useState<any[] | null>(null);
-  const [assignmentId, setAssignmentId] = useState<number>(1);
+  
+  // Get assignment ID from URL query parameter, default to 1
+  const assignmentIdFromUrl = searchParams.get("assignmentId");
+  const assignmentId = assignmentIdFromUrl ? parseInt(assignmentIdFromUrl, 10) : 1;
+  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string>("");
@@ -67,9 +72,9 @@ const ReviewTable: React.FC = () => {
   // Ref for the reviews section
   const reviewsSectionRef = useRef<HTMLDivElement>(null);
 
-  // Auto-fetch assignment 1 on mount
+  // Auto-fetch assignment from URL parameter or default to 1 on mount
   useEffect(() => {
-    fetchBackend(1);
+    fetchBackend(assignmentId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -400,29 +405,11 @@ const ReviewTable: React.FC = () => {
     <div className="p-4">
       <h2>Summary Report: Program 2</h2>
       <h5>Team: {teamName || "Loading..."}</h5>
-      <div className="mb-3">
-        <label htmlFor="assignmentId" className="mr-2">
-          Assignment ID:
-        </label>
-        <input
-          id="assignmentId"
-          type="number"
-          value={assignmentId}
-          onChange={(e) => setAssignmentId(Number(e.target.value))}
-          className="border px-2 mr-2"
-          style={{ width: 100 }}
-          min="1"
-        />
-        <button
-          onClick={() => fetchBackend(assignmentId)}
-          className="round-button mr-4"
-          disabled={isLoading}
-          style={{ borderRadius: '0.375rem' }}
-        >
-          {isLoading ? "Loading..." : "Load"}
-        </button>
-        {fetchError && <span style={{ color: "red", marginLeft: 12 }}>{fetchError}</span>}
-      </div>
+      {fetchError && (
+        <div className="mb-3">
+          <span style={{ color: "red" }}>{fetchError}</span>
+        </div>
+      )}
       <span className="ml-4">
         Team members:{" "}
         {teamMembers.map((member, index) => (
