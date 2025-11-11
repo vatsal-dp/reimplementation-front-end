@@ -5,7 +5,7 @@ import ManageUserTypes, { loader as loadUsers } from "./pages/Administrator/Mana
 import Assignment from "./pages/Assignments/Assignment";
 import AssignmentEditor from "./pages/Assignments/AssignmentEditor";
 import { loadAssignment } from "./pages/Assignments/AssignmentUtil";
-import AssignReviewer from "./pages/Assignments/AssignReviewer";
+import ResponseMappings from "./pages/ResponseMappings/ResponseMappings";
 import CreateTeams from "./pages/Assignments/CreateTeams";
 import ViewDelayedJobs from "./pages/Assignments/ViewDelayedJobs";
 import ViewReports from "./pages/Assignments/ViewReports";
@@ -51,7 +51,7 @@ function App() {
         { index: true, element: <ProtectedRoute element={<Home />} /> },
         { path: "login", element: <Login /> },
         { path: "logout", element: <ProtectedRoute element={<Logout />} /> },
-        // Add the ViewTeamGrades route
+
         {
           path: "view-team-grades",
           element: <ProtectedRoute element={<ReviewTable />} />,
@@ -60,6 +60,7 @@ function App() {
           path: "edit-questionnaire",
           element: <ProtectedRoute element={<Questionnaire />} />,
         },
+
         {
           path: "assignments/edit/:id",
           element: <AssignmentEditor mode="update" />,
@@ -71,11 +72,12 @@ function App() {
           loader: loadAssignment,
         },
 
+        // Assign Reviewer: no route loader (component handles localStorage/URL id)
         {
-          path: "assignments/edit/:id/assignreviewer",
-          element: <AssignReviewer />,
-          loader: loadAssignment,
+          path: "assignments/edit/:id/responsemappings",
+          element: <ResponseMappings />,
         },
+
         {
           path: "assignments/edit/:id/viewsubmissions",
           element: <ViewSubmissions />,
@@ -96,6 +98,7 @@ function App() {
           element: <ViewDelayedJobs />,
           loader: loadAssignment,
         },
+
         {
           path: "assignments",
           element: <ProtectedRoute element={<Assignment />} leastPrivilegeRole={ROLE.TA} />,
@@ -107,6 +110,7 @@ function App() {
             },
           ],
         },
+
         {
           path: "users",
           element: <ProtectedRoute element={<Users />} leastPrivilegeRole={ROLE.TA} />,
@@ -123,6 +127,7 @@ function App() {
             },
           ],
         },
+
         {
           path: "student_tasks/participants",
           element: <Participants type="student_tasks" id={1} />,
@@ -139,10 +144,12 @@ function App() {
             },
           ],
         },
+
         {
           path: "profile",
           element: <ProtectedRoute element={<EditProfile />} />,
         },
+
         {
           path: "assignments/edit/:assignmentId/participants",
           element: <Participants type="student_tasks" id={1} />,
@@ -159,6 +166,7 @@ function App() {
             },
           ],
         },
+
         {
           path: "student_tasks/edit/:assignmentId/participants",
           element: <Participants type="student_tasks" id={1} />,
@@ -175,6 +183,7 @@ function App() {
             },
           ],
         },
+
         {
           path: "courses/participants",
           element: <Participants type="courses" id={1} />,
@@ -235,6 +244,7 @@ function App() {
             },
           ],
         },
+
         {
           path: "administrator",
           element: (
@@ -247,10 +257,7 @@ function App() {
               element: <Roles />,
               loader: loadRoles,
               children: [
-                {
-                  path: "new",
-                  element: <RoleEditor mode="create" />,
-                },
+                { path: "new", element: <RoleEditor mode="create" /> },
                 {
                   id: "edit-role",
                   path: "edit/:id",
@@ -264,10 +271,7 @@ function App() {
               element: <Institutions />,
               loader: loadInstitutions,
               children: [
-                {
-                  path: "new",
-                  element: <InstitutionEditor mode="create" />,
-                },
+                { path: "new", element: <InstitutionEditor mode="create" /> },
                 {
                   path: "edit/:id",
                   element: <InstitutionEditor mode="update" />,
@@ -280,25 +284,16 @@ function App() {
               element: <ManageUserTypes />,
               loader: loadUsers,
               children: [
-                {
-                  path: "new",
-                  element: <Navigate to="/users/new" />,
-                },
-
-                {
-                  path: "edit/:id",
-                  element: <Navigate to="/users/edit/:id" />,
-                },
+                { path: "new", element: <Navigate to="/users/new" /> },
+                { path: "edit/:id", element: <Navigate to="/users/edit/:id" /> },
               ],
             },
-            {
-              path: "questionnaire",
-              element: <Questionnaire />,
-            },
+            { path: "questionnaire", element: <Questionnaire /> },
           ],
         },
+
         { path: "*", element: <NotFound /> },
-        { path: "questionnaire", element: <Questionnaire /> }, // Added the Questionnaire route
+        { path: "questionnaire", element: <Questionnaire /> },
       ],
     },
   ]);
